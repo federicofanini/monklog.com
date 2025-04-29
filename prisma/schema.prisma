@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model user {
+  id         String  @id @unique @default(uuid())
+  email      String  @unique
+  full_name  String
+  avatar_url String?
+
+  paid Boolean @default(false)
+  role String  @default("athlete")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([email])
+}
+
+// Represents a subscription plan associated with a user.
+// user can be business or athlete
+model plan {
+  id      String @id @default(uuid())
+  user_id String
+
+  stripe_customer_id     String
+  stripe_subscription_id String
+  stripe_price_id        String
+  plan_name              String
+  subscription_status    Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+}
