@@ -1,9 +1,10 @@
-import { Navbar } from "@/components/sections/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { siteConfig } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../styles/landing.css";
+import { AuthProvider } from "@/packages/auth/auth-provider";
+import { Provider as Analytics } from "@/packages/events/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,28 +35,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      {/* <head>
-        <Script src="https://unpkg.com/react-scan/dist/auto.global.js" />
-      </head> */}
-
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-background`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <AuthProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-background`}
         >
-          <div className="max-w-7xl mx-auto border-x relative">
-            <div className="block w-px h-full border-l border-border absolute top-0 left-6 z-10"></div>
-            <div className="block w-px h-full border-r border-border absolute top-0 right-6 z-10"></div>
-            <Navbar />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
             {children}
-          </div>
-        </ThemeProvider>
-      </body>
-    </html>
+          </ThemeProvider>
+          <Analytics />
+        </body>
+      </html>
+    </AuthProvider>
   );
 }
