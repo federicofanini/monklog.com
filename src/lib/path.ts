@@ -9,7 +9,7 @@ export const paths = {
   },
   users: {
     home: "/dashboard",
-    chat: "/dashboard/chat",
+    stats: "/dashboard/stats",
   },
   admin: {
     home: "/admin",

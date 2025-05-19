@@ -19,19 +19,19 @@ import { paths } from "@/lib/path";
 export const data = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Monk Mode",
       url: paths.users.home,
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: ListIcon,
+      title: "Stats",
+      url: paths.users.stats,
+      icon: BarChartIcon,
     },
     {
       title: "Analytics",
       url: "#",
-      icon: BarChartIcon,
+      icon: ListIcon,
     },
     {
       title: "Projects",
