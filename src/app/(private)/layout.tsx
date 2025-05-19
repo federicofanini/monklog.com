@@ -9,7 +9,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import { paths } from "@/lib/path";
 import { Toaster } from "@/components/ui/sonner";
-import { createUser } from "@/packages/database/create-user";
+import { createUser } from "@/packages/database/user/create-user";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),

@@ -1,4 +1,5 @@
-import { prisma } from "./prisma";
+import { DAY } from "@/lib/time";
+import { prisma } from "../prisma";
 
 interface CreateUserInput {
   email: string;
@@ -13,6 +14,7 @@ export async function createUser(input: CreateUserInput) {
       where: {
         email: input.email,
       },
+      cacheStrategy: { ttl: DAY },
     });
 
     if (existingUser) {
