@@ -12,7 +12,9 @@ export const paths = {
     chat: "/dashboard/chat",
   },
   admin: {
-    dashboard: "/admin/dashboard",
+    home: "/admin",
+    habits: "/admin/habits",
+    monks: "/admin/monks",
   },
   api: {
     login: "/api/auth/login",
