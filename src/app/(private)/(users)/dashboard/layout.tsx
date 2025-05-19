@@ -1,6 +1,5 @@
 import { siteConfig } from "@/lib/site";
 import type { Metadata } from "next";
-import "../../styles/private.css";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/private/users/app-sidebar";
@@ -14,7 +13,7 @@ import { createUser } from "@/packages/database/user/create-user";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `Dashboard - ${siteConfig.name}`,
+    default: `Dashboard`,
     template: `%s - Dashboard - ${siteConfig.name}`,
   },
   description: siteConfig.description,

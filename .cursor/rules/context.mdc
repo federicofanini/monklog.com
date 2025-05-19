@@ -1,0 +1,32 @@
+---
+description: App Context Scope
+globs: 
+alwaysApply: false
+---
+I'm building an app called **MonkLog** — a simple public habit tracker for founders, creators, and builders in “monk mode”.
+
+It’s not a traditional productivity tool. It’s a public digital battle log that tracks discipline and transformation.
+
+💡 The app should let users:
+- Track 5 daily habits (Wake early, No smoke, Train, Build, Sleep 7h)
+- Log notes ("Today I trained, built 6h, no cravings")
+- See a daily streak count
+- Have a public profile (e.g. monklog.app/federico)
+- Auto-generate a daily OG image to share on Twitter/X
+
+⚙️ Stack:
+- **Next.js App Router**
+- **Tailwind + Shadcn UI**
+- **Supabase** (DB)
+- **Kinde Auth** Auth provider
+- **Stripe** (Pro plan: $5/month unlocks squads, analytics, AI assistant)
+- **Deployed on Vercel**
+- **Upstash Redis** for fast streaks
+- **Resend** for email reminders
+
+Start by scaffolding the app structure:
+- `app/` folder (App Router)
+- Auth with Kinde Auth
+- Dashboard to track habits
+- Public profile route (`/[username]`)
+- OG image route (`/api/og`)
