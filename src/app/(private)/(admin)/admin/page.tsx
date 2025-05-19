@@ -1,3 +1,8 @@
+import AdminHabitPage from "@/components/private/admin/habit";
 export default function Page() {
-  return <div>Admin</div>;
+  return (
+    <div>
+      <AdminHabitPage />
+    </div>
+  );
 }

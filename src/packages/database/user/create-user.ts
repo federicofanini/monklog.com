@@ -26,7 +26,7 @@ export async function createUser(input: CreateUserInput) {
         email: input.email,
         full_name: input.full_name,
         avatar_url: input.avatar_url,
-        role: input.role || "user",
+        role: "MONK",
       },
     });
 

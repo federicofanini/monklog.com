@@ -8,7 +8,6 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import { paths } from "@/lib/path";
 import { Toaster } from "@/components/ui/sonner";
-import { createUser } from "@/packages/database/user/create-user";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -32,20 +31,6 @@ export default async function AdminLayout({
   }
 
   if (!kindeUser || !kindeUser.email) {
-    redirect(paths.api.login);
-  }
-
-  // Create or get existing user in our database
-  const user = await createUser({
-    email: kindeUser.email,
-    full_name: `${kindeUser.given_name || ""} ${
-      kindeUser.family_name || ""
-    }`.trim(),
-    avatar_url: kindeUser.picture || undefined,
-  });
-
-  if (!user) {
-    console.error("Failed to create/get user in database");
     redirect(paths.api.login);
   }
 

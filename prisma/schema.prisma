@@ -21,7 +21,7 @@ enum PlanName {
 model User {
   id         String  @id @default(uuid())
   email      String  @unique
-  username   String  @unique
+  username   String? @unique
   full_name  String
   avatar_url String?
   paid       Boolean @default(false)
@@ -51,11 +51,22 @@ model Plan {
   @@index([userId])
 }
 
+model HabitCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  habits Habit[]
+}
+
 model Habit {
-  id    String @id @default(uuid())
-  name  String @unique // e.g., "wake", "train"
-  label String // e.g., "Wake Early"
-  order Int // UI order
+  id         String        @id @default(uuid())
+  name       String        @unique // e.g., "wake", "train"
+  categoryId String
+  category   HabitCategory @relation(fields: [categoryId], references: [id])
+  order      Int // UI order
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
