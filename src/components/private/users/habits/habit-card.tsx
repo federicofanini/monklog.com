@@ -54,9 +54,6 @@ export function HabitCard({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-medium mb-2">{formatHabitName(habit.name)}</h3>
-          <div className="mt-2 text-sm text-gray-500">
-            🔥 {habit.streak || 0} day streak
-          </div>
         </div>
         <div
           className={`w-6 h-6 rounded-full border-2 transition-colors ${
