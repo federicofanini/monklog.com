@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 // Initialize OpenAI configuration
-const model = "gpt-4-turbo-preview";
+const model = "gpt-4o-mini";
 
 export async function streamingCompletion(messages: Message[]) {
   const { textStream } = streamText({

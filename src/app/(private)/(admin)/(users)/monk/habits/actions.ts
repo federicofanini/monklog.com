@@ -4,10 +4,8 @@ import { revalidatePath } from "next/cache";
 import { paths } from "@/lib/path";
 import { prisma } from "@/packages/database/prisma";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import {
-  HabitGeneratorService,
-  type GeneratedHabit,
-} from "@/packages/ai/mentors/habit-service";
+import { HabitGeneratorService } from "@/packages/ai/habit-generator";
+import { GeneratedHabit } from "@/packages/ai/habit-generator/habit-service";
 
 export async function updateUserHabits(habitIds: string[]) {
   const { getUser } = await getKindeServerSession();
