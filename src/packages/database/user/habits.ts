@@ -1,5 +1,6 @@
 import { HOUR } from "@/lib/time";
 import { prisma } from "../prisma";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 export async function getHabits() {
   try {
@@ -32,7 +33,10 @@ export async function getHabitCategories() {
   }
 }
 
-export async function getUserHabits(userId: string) {
+export async function getUserHabits() {
+  const { getUser } = await getKindeServerSession();
+  const user = await getUser();
+
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -40,7 +44,7 @@ export async function getUserHabits(userId: string) {
     const todayLog = await prisma.habitLog.findUnique({
       where: {
         userId_date: {
-          userId,
+          userId: user?.id || "",
           date: today,
         },
       },

@@ -1,26 +1,42 @@
-import OpenAI from "openai";
 import { Message } from "ai";
-import type { ChatCompletionMessageParam } from "openai/resources";
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
 
-// Initialize OpenAI client once
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+// Initialize OpenAI configuration
+const model = "gpt-4-turbo-preview";
 
 export async function streamingCompletion(messages: Message[]) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4-turbo-preview",
+  const { textStream } = streamText({
+    model: openai(model),
     messages: messages.map((msg) => ({
       role: msg.role === "data" ? "user" : msg.role,
       content: msg.content,
-    })) as ChatCompletionMessageParam[],
+    })),
     temperature: 0.7,
-    max_tokens: 150,
-    stream: true,
+    maxTokens: 150,
   });
 
-  // Return the streaming response
-  return response;
+  return textStream;
+}
+
+export async function streamingJsonCompletion(messages: Message[]) {
+  const { textStream } = streamText({
+    model: openai(model),
+    messages: [
+      ...messages.map((msg) => ({
+        role: msg.role === "data" ? "user" : msg.role,
+        content: msg.content,
+      })),
+      {
+        role: "system",
+        content: "Remember to provide your response in valid JSON format.",
+      },
+    ],
+    temperature: 0.7,
+    maxTokens: 1000,
+  });
+
+  return textStream;
 }
 
 // Helper to create a system message with the mentor's prompt

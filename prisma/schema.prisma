@@ -113,15 +113,17 @@ model HabitCategory {
 
 model Habit {
   id            String        @id @default(uuid())
-  name          String        @unique // e.g., "wake", "train"
+  name          String        @unique
   categoryId    String
   category      HabitCategory @relation(fields: [categoryId], references: [id])
-  order         Int // UI order
-  icon          String? // Emoji or icon identifier
-  is_relapsable Boolean       @default(false) // Whether this habit can be relapsed
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  order         Int
+  icon          String?
+  is_relapsable Boolean       @default(false)
+  time_block    String        @default("morning") // morning, midday, evening
+  minutes       Int           @default(5)
+  criteria      String? // Success criteria
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
 
   entries HabitEntry[]
 }

@@ -1,22 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { redirect } from "next/navigation";
-import { paths } from "@/lib/path";
 import { getUserHabits } from "@/packages/database/user/habits";
 import { HabitConfig } from "@/components/private/users/habit-config";
+import { HabitGeneratorWrapper } from "@/components/private/users/habit-generator-wrapper";
 import { updateUserHabits } from "./actions";
 
 export default async function HabitsPage() {
-  const { getUser } = await getKindeServerSession();
-  const user = await getUser();
-
-  if (!user?.id) {
-    redirect(paths.api.login);
-  }
-
   try {
-    const habits = await getUserHabits(user.id);
+    const habits = await getUserHabits();
 
     return (
       <div className="container max-w-2xl py-8 space-y-8 mx-auto">
@@ -28,13 +19,32 @@ export default async function HabitsPage() {
           </p>
         </div>
 
-        <HabitConfig
-          habits={habits}
-          onSave={async (habitIds) => {
-            "use server";
-            await updateUserHabits(user.id, habitIds);
-          }}
-        />
+        {habits.length === 0 ? (
+          <HabitGeneratorWrapper />
+        ) : (
+          <>
+            <HabitConfig
+              habits={habits}
+              onSave={async (habitIds) => {
+                "use server";
+                await updateUserHabits(habitIds);
+              }}
+            />
+
+            <div className="pt-4">
+              <Card className="p-6 bg-black/40">
+                <div className="space-y-4">
+                  <h3 className="font-mono text-red-500">NEED A RESET?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Let the AI mentor design a new strategic habit system based
+                    on your current goals and constraints.
+                  </p>
+                  <HabitGeneratorWrapper />
+                </div>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     );
   } catch (error) {
