@@ -22,8 +22,8 @@ export default function ChatPage() {
     });
 
   return (
-    <div className="flex flex-col h-[90dvh] bg-black">
-      <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full">
+    <div className="flex flex-col min-h-screen bg-black">
+      <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full pt-12">
         <ScrollArea className="flex-1 px-3 sm:px-4 py-6">
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.length === 0 ? (
