@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MentorSelect,
   MentorType,
@@ -11,19 +11,65 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
+import { toast } from "sonner";
 
 export default function ChatPage() {
   const [mentor, setMentor] = useState<MentorType>("MONK");
+  const [remainingMessages, setRemainingMessages] = useState<number | null>(
+    null
+  );
+  const { user } = useKindeAuth();
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       body: {
         mentor,
       },
+      onError: (error) => {
+        if (error.message.includes("Daily message limit reached")) {
+          toast.error(
+            "Daily message limit reached. Upgrade to continue chatting."
+          );
+          fetchRemainingMessages();
+        } else {
+          toast.error("Failed to send message. Please try again.");
+        }
+      },
     });
+
+  const fetchRemainingMessages = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`/api/chat/usage?userId=${user.id}`);
+      const data = await response.json();
+      setRemainingMessages(3 - data.usage);
+
+      // Show warning toast when user has 1 message remaining
+      if (3 - data.usage === 1) {
+        toast.warning("You have 1 message remaining today.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch remaining messages:", error);
+      toast.error("Failed to fetch message limit status.");
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchRemainingMessages();
+    }
+  }, [user?.id]);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full pt-12">
+        {remainingMessages !== null && remainingMessages < 3 && (
+          <div className="px-4 py-2 bg-red-500/10 text-red-400 text-sm font-mono mb-4 rounded-lg">
+            {remainingMessages > 0
+              ? `${remainingMessages} free messages remaining today`
+              : "Daily message limit reached. Upgrade to continue chatting."}
+          </div>
+        )}
         <ScrollArea className="flex-1 px-3 sm:px-4 py-6">
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.length === 0 ? (
@@ -93,7 +139,7 @@ export default function ChatPage() {
                   placeholder="Share your truth..."
                   className="min-h-[44px] max-h-[200px] bg-black/40 resize-none border-red-500/20 focus:ring-1 focus:ring-red-500/40 placeholder:text-white/20 text-sm font-mono"
                   rows={1}
-                  disabled={isLoading}
+                  disabled={isLoading || remainingMessages === 0}
                 />
                 <div className="flex flex-col justify-end gap-2">
                   <MentorSelect value={mentor} onValueChange={setMentor} />
@@ -105,7 +151,7 @@ export default function ChatPage() {
                         ? "bg-red-500/50"
                         : "bg-red-500/80 hover:bg-red-500"
                     }`}
-                    disabled={isLoading}
+                    disabled={isLoading || remainingMessages === 0}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

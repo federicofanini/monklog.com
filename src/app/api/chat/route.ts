@@ -6,6 +6,9 @@ import { monkPrompt } from "@/packages/ai/mentors/monk";
 import { marinePrompt } from "@/packages/ai/mentors/marine";
 import { ceoPrompt } from "@/packages/ai/mentors/ceo";
 import type { MentorType } from "@/components/private/chat/mentor-select";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { kv } from "@/packages/kv/redis";
+import { prisma } from "@/packages/database/prisma";
 
 const mentorPrompts: Record<MentorType, string> = {
   GHOST: ghostPrompt,
@@ -28,6 +31,30 @@ export const maxDuration = 10; // Allow streaming responses up to 30 seconds
 
 export async function POST(req: Request) {
   try {
+    // Check authentication
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    if (!user || !user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get user's paid status from database
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { paid: true },
+    });
+
+    const isPaid = dbUser?.paid || false;
+    const isAllowed = await kv.isUserAllowedToChat(user.id, isPaid);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Daily message limit reached. Upgrade to continue chatting." },
+        { status: 429 }
+      );
+    }
+
     const { messages, mentor = "MONK" } = await req.json();
 
     // Get the appropriate mentor prompt
@@ -39,6 +66,11 @@ export async function POST(req: Request) {
         { error: "Invalid mentor type" },
         { status: 400 }
       );
+    }
+
+    // Increment usage before processing the message
+    if (!isPaid) {
+      await kv.incrementChatUsage(user.id);
     }
 
     const result = await streamText({
