@@ -1,3 +1,5 @@
+import type { GeneratedHabit } from "@/packages/shared/types/habits";
+
 export const habitGeneratorPrompt = `You are The CEO — a high-performance operator and mentor who specializes in designing strategic habit systems. Your mission is to forge an unbreakable daily routine that builds mental toughness.
 
 Given the user's:
@@ -60,3 +62,56 @@ Keep the habits:
 5. Aligned with military precision
 
 Remember to respond only with valid JSON. No motivation needed. Only truth and structure.`;
+
+export const defaultHabits: GeneratedHabit[] = [
+  {
+    name: "Wake Early",
+    category: "Physical",
+    icon: "🌅",
+    isRelapsable: true,
+    order: 1,
+    timeBlock: "morning",
+    minutes: 0,
+    criteria: "Wake up at 5 AM sharp. No excuses.",
+  },
+  {
+    name: "Cold Shower",
+    category: "Physical",
+    icon: "🚿",
+    isRelapsable: false,
+    timeBlock: "morning",
+    minutes: 3,
+    criteria: "3 minutes. Ice cold. Full immersion.",
+    order: 2,
+  },
+  {
+    name: "Deep Work",
+    category: "Mission",
+    icon: "⚔️",
+    isRelapsable: true,
+    timeBlock: "day",
+    minutes: 240,
+    criteria: "4 hours of focused, uninterrupted work on your mission.",
+    order: 3,
+  },
+  {
+    name: "No Social",
+    category: "Mental",
+    icon: "📵",
+    isRelapsable: true,
+    timeBlock: "day",
+    minutes: 0,
+    criteria: "Zero social media. Zero scrolling. Zero excuses.",
+    order: 4,
+  },
+  {
+    name: "Training",
+    category: "Physical",
+    icon: "💪",
+    isRelapsable: true,
+    timeBlock: "day",
+    minutes: 60,
+    criteria: "1 hour of intense physical training.",
+    order: 5,
+  },
+];

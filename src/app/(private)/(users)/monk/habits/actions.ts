@@ -7,7 +7,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
   HabitGeneratorService,
   type GeneratedHabit,
-} from "@/packages/ai/habits/habit-service";
+} from "@/packages/ai/mentors/habit-service";
 
 export async function updateUserHabits(habitIds: string[]) {
   const { getUser } = await getKindeServerSession();

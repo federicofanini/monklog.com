@@ -59,6 +59,7 @@ export function Sidebar() {
                               "opacity-50": !item.isActive,
                               "border-b border-primary":
                                 index === navigation.length - 1,
+                              "text-red-500": item.isActive,
                             })}
                           >
                             <Link href={item.path}>

@@ -1,20 +1,24 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getUserHabits } from "@/packages/database/user/habits";
-import { HabitConfig } from "@/components/private/users/habit-config";
 import { HabitTimeline } from "@/components/private/users/habit-timeline";
 import { HabitGeneratorWrapper } from "@/components/private/users/habit-generator-wrapper";
-import { updateUserHabits, deleteHabits } from "./actions";
+import { deleteHabits } from "./actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { redirect } from "next/navigation";
+import { paths } from "@/lib/path";
 
 export default async function HabitsPage() {
+  const { getUser } = await getKindeServerSession();
+  const user = await getUser();
+
+  if (!user?.id) {
+    redirect(paths.api.login);
+  }
+
   try {
     const habits = await getUserHabits();
-
-    async function handleDelete() {
-      "use server";
-      await deleteHabits();
-    }
 
     return (
       <div className="container max-w-2xl py-8 space-y-8 mx-auto">
@@ -42,13 +46,35 @@ export default async function HabitsPage() {
                 </TabsContent>
 
                 <TabsContent value="list">
-                  <HabitConfig
-                    habits={habits}
-                    onSave={async (habitIds) => {
-                      "use server";
-                      await updateUserHabits(habitIds);
-                    }}
-                  />
+                  <div className="space-y-4">
+                    {habits.map((habit) => (
+                      <Card key={habit.id} className="p-4 bg-black/40">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="text-xl">{habit.icon || "⚡"}</div>
+                            <div>
+                              <h4 className="font-medium">{habit.name}</h4>
+                              {habit.criteria && (
+                                <p className="text-sm text-muted-foreground">
+                                  {habit.criteria}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              {habit.category.name}
+                            </span>
+                            {habit.is_relapsable && (
+                              <span className="text-red-500 text-sm">
+                                Relapsable
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
@@ -58,7 +84,12 @@ export default async function HabitsPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="font-mono text-red-500">NEED A RESET?</h3>
-                    <form action={handleDelete}>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await deleteHabits();
+                      }}
+                    >
                       <Button
                         type="submit"
                         variant="destructive"

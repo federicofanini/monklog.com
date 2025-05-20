@@ -39,36 +39,68 @@ export async function getUserHabits() {
   const { getUser } = await getKindeServerSession();
   const user = await getUser();
 
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
+
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todayLog = await prisma.habitLog.findUnique({
+    // Get user's habits from their most recent log (within last 7 days)
+    const recentLog = await prisma.habitLog.findFirst({
       where: {
-        userId_date: {
-          userId: user?.id || "",
-          date: today,
+        userId: user.id,
+        date: {
+          gte: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
         },
+      },
+      orderBy: {
+        date: "desc",
       },
       include: {
         entries: {
           include: {
-            habit: true,
+            habit: {
+              include: {
+                category: true,
+              },
+            },
           },
         },
       },
       cacheStrategy: { ttl: 300 }, // 5 minutes cache
     });
 
-    const allHabits = await getHabits();
+    // If no recent log exists, return empty array
+    if (!recentLog) {
+      return [];
+    }
 
-    return allHabits.map((habit) => {
-      const entry = todayLog?.entries.find((e) => e.habitId === habit.id);
+    // Get today's log if it exists
+    const todayLog = await prisma.habitLog.findUnique({
+      where: {
+        userId_date: {
+          userId: user.id,
+          date: today,
+        },
+      },
+      include: {
+        entries: true,
+      },
+    });
+
+    // Map the habits from recent log and merge with today's status
+    return recentLog.entries.map((recentEntry) => {
+      const todayEntry = todayLog?.entries.find(
+        (e) => e.habitId === recentEntry.habit.id
+      );
+
       return {
-        ...habit,
-        isTracked: !!entry,
-        isCompleted: entry?.completed || false,
-        isRelapsed: entry?.relapsed || false,
+        ...recentEntry.habit,
+        isTracked: true,
+        isCompleted: todayEntry?.completed || false,
+        isRelapsed: todayEntry?.relapsed || false,
       };
     });
   } catch (error) {
