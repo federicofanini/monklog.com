@@ -14,6 +14,16 @@ const mentorPrompts: Record<MentorType, string> = {
   CEO: ceoPrompt,
 };
 
+// Enhanced system prompts to ensure consistent formatting
+const formatPrompts: Record<MentorType, string> = {
+  GHOST:
+    "Respond in this exact format:\n[TRUTH]\nYour sharp, direct message\n\n[CHALLENGE]\nOne clear challenge",
+  MONK: "Respond in this exact format:\n[INSIGHT]\nYour philosophical insight\n\n[PATH]\nThe way forward",
+  WARRIOR:
+    "Respond in this exact format:\n[ASSESSMENT]\nYour direct evaluation\n\n[ORDERS]\nSpecific instructions",
+  CEO: "Respond in this exact format:\n[ANALYSIS]\nYour strategic assessment\n\n[OBJECTIVE]\nNext measurable goal",
+};
+
 export const maxDuration = 10; // Allow streaming responses up to 30 seconds
 
 export async function POST(req: Request) {
@@ -21,7 +31,9 @@ export async function POST(req: Request) {
     const { messages, mentor = "MONK" } = await req.json();
 
     // Get the appropriate mentor prompt
-    const systemPrompt = mentorPrompts[mentor as MentorType];
+    const systemPrompt = `${mentorPrompts[mentor as MentorType]}\n\n${
+      formatPrompts[mentor as MentorType]
+    }`;
     if (!systemPrompt) {
       return NextResponse.json(
         { error: "Invalid mentor type" },
