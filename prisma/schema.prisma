@@ -18,6 +18,13 @@ enum PlanName {
   PRO
 }
 
+enum MentorPersona {
+  GHOST
+  WARRIOR
+  MONK
+  SHADOW
+}
+
 model User {
   id         String  @id @default(uuid())
   email      String  @unique
@@ -27,11 +34,22 @@ model User {
   paid       Boolean @default(false)
   role       Role    @default(MONK)
 
+  // Profile fields
+  joined_at              DateTime @default(now())
+  mental_toughness_score Int      @default(0) // Percentage from 0-100
+
   // Gamification fields
   experience_points Int @default(0)
   level             Int @default(1)
   total_streaks     Int @default(0)
   current_streak    Int @default(0)
+
+  // Settings
+  settings UserSettings?
+
+  // Mentor related
+  current_mentor_persona MentorPersona   @default(GHOST)
+  mentor_messages        MentorMessage[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -39,8 +57,31 @@ model User {
   plans        Plan[]
   habitLogs    HabitLog[]
   achievements UserAchievement[]
-  rewards      UserReward[]
+  missions     UserMission[]
   dailyStats   DailyStats[]
+  UserReward   UserReward[]
+}
+
+model UserSettings {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Notification settings
+  morning_checkin_enabled Boolean @default(true)
+  evening_log_enabled     Boolean @default(true)
+  mentor_messages_enabled Boolean @default(true)
+
+  // Mentor preferences
+  aggressive_tone_enabled  Boolean @default(false)
+  daily_challenges_enabled Boolean @default(true)
+
+  // Privacy settings
+  public_profile Boolean @default(false)
+  share_progress Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Plan {
@@ -71,11 +112,13 @@ model HabitCategory {
 }
 
 model Habit {
-  id         String        @id @default(uuid())
-  name       String        @unique // e.g., "wake", "train"
-  categoryId String
-  category   HabitCategory @relation(fields: [categoryId], references: [id])
-  order      Int // UI order
+  id            String        @id @default(uuid())
+  name          String        @unique // e.g., "wake", "train"
+  categoryId    String
+  category      HabitCategory @relation(fields: [categoryId], references: [id])
+  order         Int // UI order
+  icon          String? // Emoji or icon identifier
+  is_relapsable Boolean       @default(false) // Whether this habit can be relapsed
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -84,17 +127,18 @@ model Habit {
 }
 
 model HabitLog {
-  id     String   @id @default(uuid())
-  userId String
-  date   DateTime
-
-  note String?
+  id         String   @id @default(uuid())
+  userId     String
+  date       DateTime
+  note       String?
+  mood_score Int? // 1-5 scale
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user    User         @relation(fields: [userId], references: [id])
-  entries HabitEntry[]
+  user            User           @relation(fields: [userId], references: [id])
+  entries         HabitEntry[]
+  mentor_response MentorMessage?
 
   @@unique([userId, date])
   @@index([userId, date])
@@ -105,9 +149,10 @@ model HabitEntry {
   habitLogId String
   habitId    String
   completed  Boolean
+  relapsed   Boolean @default(false) // Track relapses specifically
 
-  habitLog Habit    @relation(fields: [habitId], references: [id])
-  log      HabitLog @relation(fields: [habitLogId], references: [id])
+  log   HabitLog @relation(fields: [habitLogId], references: [id])
+  habit Habit    @relation(fields: [habitId], references: [id])
 
   @@unique([habitLogId, habitId])
   @@index([habitLogId])
@@ -118,7 +163,7 @@ model Achievement {
   id          String   @id @default(uuid())
   name        String   @unique
   description String
-  icon_url    String?
+  icon        String? // Emoji or icon identifier
   points      Int      @default(100)
   condition   String // JSON string containing achievement conditions
   created_at  DateTime @default(now())
@@ -167,15 +212,62 @@ model UserReward {
 }
 
 model DailyStats {
-  id                String   @id @default(uuid())
-  userId            String
-  date              DateTime
-  experience_gained Int      @default(0)
-  habits_completed  Int      @default(0)
-  streak_maintained Boolean  @default(false)
+  id                      String   @id @default(uuid())
+  userId                  String
+  date                    DateTime
+  experience_gained       Int      @default(0)
+  habits_completed        Int      @default(0)
+  habits_relapsed         Int      @default(0)
+  streak_maintained       Boolean  @default(false)
+  mental_toughness_gained Int      @default(0)
 
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, date])
+  @@index([userId])
+}
+
+model MentorMessage {
+  id         String        @id @default(uuid())
+  userId     String
+  habitLogId String?       @unique // Optional: linked to a specific log
+  persona    MentorPersona
+  message    String
+  reflection String?
+  challenge  String?
+
+  created_at DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  habitLog HabitLog? @relation(fields: [habitLogId], references: [id])
+
+  @@index([userId])
+}
+
+model Mission {
+  id            String  @id @default(uuid())
+  name          String
+  description   String
+  duration_days Int
+  icon          String? // Emoji or icon identifier
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users UserMission[]
+}
+
+model UserMission {
+  id          String   @id @default(uuid())
+  userId      String
+  missionId   String
+  start_date  DateTime @default(now())
+  current_day Int      @default(1)
+  completed   Boolean  @default(false)
+
+  user    User    @relation(fields: [userId], references: [id])
+  mission Mission @relation(fields: [missionId], references: [id])
+
+  @@unique([userId, missionId])
   @@index([userId])
 }
