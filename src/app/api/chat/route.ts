@@ -14,7 +14,7 @@ const mentorPrompts: Record<MentorType, string> = {
   CEO: ceoPrompt,
 };
 
-export const maxDuration = 30; // Allow streaming responses up to 30 seconds
+export const maxDuration = 10; // Allow streaming responses up to 30 seconds
 
 export async function POST(req: Request) {
   try {
