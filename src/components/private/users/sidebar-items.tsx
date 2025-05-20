@@ -4,7 +4,7 @@ import {
   MdPhotoLibrary,
   MdLocationOn,
   MdMan4,
-  MdBarChart,
+  MdAssistantPhoto,
 } from "react-icons/md";
 
 export const sidebarItems = [
@@ -14,9 +14,9 @@ export const sidebarItems = [
     path: `/monk`,
   },
   {
-    icon: MdBarChart,
-    label: "Monk Stats",
-    path: `/monk/stats`,
+    icon: MdAssistantPhoto,
+    label: "Monk Habits",
+    path: `/monk/habits`,
   },
   {
     icon: MdLocationOn,

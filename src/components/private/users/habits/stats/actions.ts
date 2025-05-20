@@ -2,7 +2,7 @@
 
 import { toggleHabitCompletion } from "@/packages/database/user/habits";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { HabitToggleResponse } from "./types";
+import { HabitToggleResponse } from "../types";
 
 export async function handleHabitToggle(
   id: string
