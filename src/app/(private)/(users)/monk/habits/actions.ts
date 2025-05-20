@@ -17,37 +17,35 @@ export async function updateUserHabits(habitIds: string[]) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get or create today's log
-    const log = await prisma.habitLog.upsert({
+    // Check if today's log exists
+    const existingLog = await prisma.habitLog.findUnique({
       where: {
         userId_date: {
           userId: user?.id || "",
           date: today,
         },
       },
-      create: {
-        userId: user?.id || "",
-        date: today,
-      },
-      update: {},
     });
 
-    // Delete existing entries
-    await prisma.habitEntry.deleteMany({
-      where: {
-        habitLogId: log.id,
-      },
-    });
+    // Only update entries if a log already exists
+    if (existingLog) {
+      // Delete existing entries
+      await prisma.habitEntry.deleteMany({
+        where: {
+          habitLogId: existingLog.id,
+        },
+      });
 
-    // Create new entries
-    await prisma.habitEntry.createMany({
-      data: habitIds.map((habitId) => ({
-        habitLogId: log.id,
-        habitId,
-        completed: false,
-        relapsed: false,
-      })),
-    });
+      // Create new entries
+      await prisma.habitEntry.createMany({
+        data: habitIds.map((habitId) => ({
+          habitLogId: existingLog.id,
+          habitId,
+          completed: false,
+          relapsed: false,
+        })),
+      });
+    }
 
     revalidatePath(paths.monk.log);
     return { success: true };

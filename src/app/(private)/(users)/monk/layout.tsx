@@ -8,7 +8,7 @@ import { paths } from "@/lib/path";
 import { Toaster } from "@/components/ui/sonner";
 import { Sidebar } from "@/components/private/users/sidebar";
 import { Header } from "@/components/private/users/header";
-import { getUserProfile } from "@/packages/database/user";
+// import { getUserProfile } from "@/packages/database/user";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -37,12 +37,12 @@ export default async function PrivateLayout({
   }
 
   // Check if user needs onboarding
-  const profile = await getUserProfile(user.id);
-  const needsOnboarding = !profile.settings; // No settings means new user
+  // const profile = await getUserProfile(user.id);
+  // const needsOnboarding = !profile.settings; // No settings means new user
 
-  if (needsOnboarding) {
-    redirect("/onboarding");
-  }
+  // if (needsOnboarding) {
+  //   redirect("/onboarding");
+  // }
 
   return (
     <SidebarProvider>

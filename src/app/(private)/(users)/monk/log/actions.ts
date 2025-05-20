@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/packages/database/prisma";
 import { MentorService } from "@/packages/ai/mentors/mentor-service";
 import { getCurrentMentorPersona } from "@/packages/database/user/mentor";
@@ -188,4 +188,26 @@ export async function generateHabits(input: GenerateHabitsInput) {
   });
 
   return result;
+}
+
+export async function clearCache() {
+  "use server";
+
+  try {
+    // Revalidate all relevant paths
+    revalidatePath(paths.monk.log);
+    revalidatePath(paths.monk.history);
+    revalidatePath(paths.monk.habits);
+    revalidatePath(paths.monk.profile);
+
+    // Revalidate specific data tags
+    revalidateTag("habits");
+    revalidateTag("logs");
+    revalidateTag("profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error clearing cache:", error);
+    return { success: false, error: "Failed to clear cache" };
+  }
 }

@@ -77,7 +77,7 @@ export async function getUserHabits() {
       return [];
     }
 
-    // Get today's log if it exists
+    // Get today's log if it exists (but don't create one)
     const todayLog = await prisma.habitLog.findUnique({
       where: {
         userId_date: {
