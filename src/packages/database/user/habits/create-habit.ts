@@ -3,7 +3,7 @@
 import { prisma } from "../../prisma";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-
+import { paths } from "@/lib/path";
 interface CreateHabitInput {
   name: string;
   categoryName: string;
@@ -15,7 +15,7 @@ export async function createHabit(input: CreateHabitInput) {
   const user = await getUser();
 
   if (!user || !user.id) {
-    redirect("/auth/login");
+    redirect(paths.api.login);
   }
 
   try {

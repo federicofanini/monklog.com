@@ -1,17 +1,17 @@
 import {
-  MdDashboard,
   MdBatchPrediction,
   MdAppShortcut,
   MdBusiness,
   MdPhotoLibrary,
   MdLocationOn,
+  MdMan4,
 } from "react-icons/md";
 
 export const sidebarItems = [
   {
-    icon: MdDashboard,
-    label: "Dashboard",
-    path: `/business`,
+    icon: MdMan4,
+    label: "Monk Mode",
+    path: `/monk`,
   },
   {
     icon: MdBusiness,

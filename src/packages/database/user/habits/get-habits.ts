@@ -4,13 +4,13 @@ import { prisma } from "../../prisma";
 import { startOfDay } from "date-fns";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-
+import { paths } from "@/lib/path";
 export async function getUserHabits() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
   if (!user || !user.id) {
-    redirect("/auth/login");
+    redirect(paths.api.login);
   }
 
   const userId = user.id;

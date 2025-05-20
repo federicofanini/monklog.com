@@ -31,7 +31,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="rounded-full w-8 h-8 cursor-pointer">
+        <Avatar className="rounded-lg w-8 h-8 cursor-pointer">
           {user.picture && (
             <AvatarImage
               src={user.picture}

@@ -1,8 +1,8 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HabitTracker } from "./HabitTracker";
-import { HabitStats } from "./HabitStats";
+import { HabitTracker } from "./habit-tracker";
+import { HabitStats } from "./stats/habit-stats";
 
 export function HabitTabs({ userId }: { userId: string }) {
   return (

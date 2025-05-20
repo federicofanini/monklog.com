@@ -5,13 +5,14 @@ import { startOfDay } from "date-fns";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import { processHabitCompletion } from "./gamification";
+import { paths } from "@/lib/path";
 
 export async function toggleHabitCompletion(habitId: string) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
   if (!user || !user.id) {
-    redirect("/auth/login");
+    redirect(paths.api.login);
   }
 
   const userId = user.id;
