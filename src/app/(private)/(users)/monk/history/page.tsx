@@ -22,7 +22,7 @@ const logs = [
 
 export default function HistoryPage() {
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
+    <div className="container max-w-2xl py-8 space-y-8 mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Training History</h1>
         <Button variant="outline">Filter Logs</Button>

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 
 export default function SettingsPage() {
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
+    <div className="container max-w-2xl py-8 space-y-8 mx-auto">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground">

@@ -54,7 +54,7 @@ export default async function PrivateLayout({
         <SidebarInset className="flex-1 bg-noise pb-8">
           <Header />
 
-          <main className="pt-4">
+          <main className="pt-4 mx-auto max-w-4xl px-4">
             {children}
 
             <Toaster />

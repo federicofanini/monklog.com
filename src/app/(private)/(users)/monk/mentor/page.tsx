@@ -35,7 +35,7 @@ const mentorPersonas = [
 
 export default function MentorPage() {
   return (
-    <div className="container max-w-4xl py-8 space-y-8">
+    <div className="container max-w-4xl py-8 space-y-8 mx-auto">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">Choose Your Mentor</h1>
         <p className="text-muted-foreground">

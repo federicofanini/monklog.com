@@ -3,7 +3,7 @@ import { StreakCounter } from "@/components/ui/streak-counter";
 
 export default function ProfilePage() {
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
+    <div className="container max-w-2xl py-8 space-y-8 mx-auto">
       <Card className="p-6 bg-black/40">
         <div className="flex items-center gap-6">
           <div className="h-20 w-20 rounded-full bg-red-500/20 flex items-center justify-center">

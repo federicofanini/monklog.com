@@ -5,7 +5,7 @@ import { StreakCounter } from "@/components/ui/streak-counter";
 
 export default function LogPage() {
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
+    <div className="container max-w-2xl py-8 space-y-8 mx-auto">
       <div className="flex justify-between items-center">
         <StreakCounter count={13} />
         <span className="text-muted-foreground">21:45 PM</span>
