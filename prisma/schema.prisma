@@ -27,11 +27,20 @@ model User {
   paid       Boolean @default(false)
   role       Role    @default(MONK)
 
+  // Gamification fields
+  experience_points Int @default(0)
+  level             Int @default(1)
+  total_streaks     Int @default(0)
+  current_streak    Int @default(0)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  plans     Plan[]
-  habitLogs HabitLog[]
+  plans        Plan[]
+  habitLogs    HabitLog[]
+  achievements UserAchievement[]
+  rewards      UserReward[]
+  dailyStats   DailyStats[]
 }
 
 model Plan {
@@ -102,4 +111,71 @@ model HabitEntry {
 
   @@unique([habitLogId, habitId])
   @@index([habitLogId])
+}
+
+// Gamification Models
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  icon_url    String?
+  points      Int      @default(100)
+  condition   String // JSON string containing achievement conditions
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  users UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  unlocked_at   DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model Reward {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  cost        Int // Experience points needed
+  icon_url    String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  users UserReward[]
+}
+
+model UserReward {
+  id       String    @id @default(uuid())
+  userId   String
+  rewardId String
+  claimed  Boolean   @default(false)
+  claim_at DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  reward Reward @relation(fields: [rewardId], references: [id])
+
+  @@unique([userId, rewardId])
+  @@index([userId])
+}
+
+model DailyStats {
+  id                String   @id @default(uuid())
+  userId            String
+  date              DateTime
+  experience_gained Int      @default(0)
+  habits_completed  Int      @default(0)
+  streak_maintained Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId])
 }

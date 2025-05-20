@@ -1,129 +1,51 @@
 import {
-  BarChartIcon,
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react";
-import { paths } from "@/lib/path";
+  MdDashboard,
+  MdBatchPrediction,
+  MdAppShortcut,
+  MdBusiness,
+  MdPhotoLibrary,
+  MdLocationOn,
+} from "react-icons/md";
 
-export const data = {
-  navMain: [
-    {
-      title: "Monk Mode",
-      url: paths.users.home,
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Stats",
-      url: paths.users.stats,
-      icon: BarChartIcon,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: ListIcon,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
-  ],
-};
+export const sidebarItems = [
+  {
+    icon: MdDashboard,
+    label: "Dashboard",
+    path: `/business`,
+  },
+  {
+    icon: MdBusiness,
+    label: "Profile",
+    path: `/business/profile`,
+  },
+  {
+    icon: MdLocationOn,
+    label: "Location",
+    path: `/business/location`,
+  },
+  {
+    icon: MdPhotoLibrary,
+    label: "Gallery",
+    path: `/business/gallery`,
+  },
+  //{
+  //  icon: MdSportsGymnastics,
+  //  label: "Athletes",
+  //  path: `/business/athletes`,
+  //},
+  //{
+  //  icon: Dumbbell,
+  //  label: "Workouts",
+  //  path: `/business/workouts`,
+  //},
+  {
+    icon: MdBatchPrediction,
+    label: "Feedback",
+    path: `/business/feedback`,
+  },
+  {
+    icon: MdAppShortcut,
+    label: "Mobile App",
+    path: `/business/mobile-app`,
+  },
+];

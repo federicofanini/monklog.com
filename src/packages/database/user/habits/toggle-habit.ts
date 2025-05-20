@@ -4,6 +4,7 @@ import { prisma } from "../../prisma";
 import { startOfDay } from "date-fns";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
+import { processHabitCompletion } from "./gamification";
 
 export async function toggleHabitCompletion(habitId: string) {
   const { getUser } = getKindeServerSession();
@@ -53,10 +54,11 @@ export async function toggleHabitCompletion(habitId: string) {
 
     // Toggle the habit entry
     const existingEntry = todayLog.entries[0];
+    let completed = false;
 
     if (existingEntry) {
       // Update existing entry
-      await prisma.habitEntry.update({
+      const updatedEntry = await prisma.habitEntry.update({
         where: {
           id: existingEntry.id,
         },
@@ -64,8 +66,7 @@ export async function toggleHabitCompletion(habitId: string) {
           completed: !existingEntry.completed,
         },
       });
-
-      return { completed: !existingEntry.completed };
+      completed = updatedEntry.completed;
     } else {
       // Create new entry
       const newEntry = await prisma.habitEntry.create({
@@ -75,9 +76,20 @@ export async function toggleHabitCompletion(habitId: string) {
           completed: true,
         },
       });
-
-      return { completed: newEntry.completed };
+      completed = newEntry.completed;
     }
+
+    // Process gamification
+    const gamificationResult = await processHabitCompletion(
+      userId,
+      habitId,
+      completed
+    );
+
+    return {
+      completed,
+      gamification: gamificationResult,
+    };
   } catch (error) {
     console.error("Error toggling habit completion:", error);
     throw error;

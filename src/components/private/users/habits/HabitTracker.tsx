@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  getUserHabits,
+  toggleHabitCompletion,
+} from "@/packages/database/user/habits";
+import { useGamification } from "@/hooks/useGamification";
+import { toast } from "sonner";
 
 interface Habit {
   id: string;
@@ -13,83 +19,94 @@ interface Habit {
   streak: number;
 }
 
-const CATEGORIES = {
+// Helper function to format habit name
+function formatHabitName(name: string): string {
+  return name
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+const CATEGORY_ICONS = {
   "Mind & Discipline": "🧠",
   "Body & Energy": "💪",
   "Work & Purpose": "🛠️",
   "Optional High-Level": "🧘",
+  // Add fallback for unknown categories
+  default: "📌",
 };
 
-export function HabitTracker() {
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: "1",
-      name: "Wake up early (before 6:30 AM)",
-      category: "Mind & Discipline",
-      order: 0,
-      completed: false,
-      streak: 5,
-    },
-    {
-      id: "2",
-      name: "No smoking",
-      category: "Mind & Discipline",
-      order: 0,
-      completed: false,
-      streak: 10,
-    },
-    {
-      id: "3",
-      name: "No alcohol",
-      category: "Mind & Discipline",
-      order: 0,
-      completed: false,
-      streak: 15,
-    },
-    {
-      id: "4",
-      name: "Daily workout",
-      category: "Body & Energy",
-      order: 1,
-      completed: false,
-      streak: 3,
-    },
-    {
-      id: "5",
-      name: "10,000+ steps",
-      category: "Body & Energy",
-      order: 1,
-      completed: false,
-      streak: 4,
-    },
-    {
-      id: "6",
-      name: "4+ hours of deep work",
-      category: "Work & Purpose",
-      order: 2,
-      completed: false,
-      streak: 7,
-    },
-    {
-      id: "7",
-      name: "Ship or share progress daily",
-      category: "Work & Purpose",
-      order: 2,
-      completed: false,
-      streak: 2,
-    },
-  ]);
+export function HabitTracker({ userId }: { userId: string | undefined }) {
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const { updateGamification } = useGamification(userId);
+
+  useEffect(() => {
+    loadHabits();
+  }, []);
+
+  const loadHabits = async () => {
+    try {
+      const userHabits = await getUserHabits();
+      setHabits(
+        userHabits.map((h) => ({
+          id: h.id,
+          name: h.name,
+          category: h.category.name,
+          order: h.order,
+          completed: h.completedToday,
+          streak: 0, // This will come from the gamification system
+        }))
+      );
+    } catch (error) {
+      console.error("Error loading habits:", error);
+      toast.error("Failed to load habits");
+    }
+  };
 
   const completedHabits = habits.filter((h) => h.completed).length;
   const totalHabits = habits.length;
   const progress = (completedHabits / totalHabits) * 100;
 
-  const toggleHabit = (id: string) => {
-    setHabits(
-      habits.map((habit) =>
-        habit.id === id ? { ...habit, completed: !habit.completed } : habit
-      )
-    );
+  const toggleHabit = async (id: string) => {
+    try {
+      const result = await toggleHabitCompletion(id);
+
+      // Update local state
+      setHabits(
+        habits.map((habit) =>
+          habit.id === id ? { ...habit, completed: result.completed } : habit
+        )
+      );
+
+      // Update gamification state
+      if (result.gamification) {
+        // Add default icons to achievements before updating state
+        const gamificationWithIcons = {
+          ...result.gamification,
+          achievements: result.gamification.achievements?.map(
+            (achievement) => ({
+              ...achievement,
+              icon: "🏆", // Default icon for all achievements
+            })
+          ),
+        };
+        updateGamification(gamificationWithIcons);
+
+        // Show achievement notifications
+        result.gamification.achievements?.forEach((achievement) => {
+          toast.success(`Achievement Unlocked: ${achievement.name}`, {
+            description: achievement.description,
+          });
+        });
+
+        if (result.gamification.experienceGained > 0) {
+          toast.success(`+${result.gamification.experienceGained} XP`);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling habit:", error);
+      toast.error("Failed to update habit");
+    }
   };
 
   // Group habits by category
@@ -119,7 +136,10 @@ export function HabitTracker() {
         {Object.entries(habitsByCategory).map(([category, categoryHabits]) => (
           <div key={category}>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <span>{CATEGORIES[category as keyof typeof CATEGORIES]}</span>
+              <span>
+                {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] ||
+                  CATEGORY_ICONS.default}
+              </span>
               <span>{category}</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -133,7 +153,9 @@ export function HabitTracker() {
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-medium mb-2">{habit.name}</h3>
+                      <h3 className="font-medium mb-2">
+                        {formatHabitName(habit.name)}
+                      </h3>
                       <div className="mt-2 text-sm text-gray-500">
                         🔥 {habit.streak} day streak
                       </div>

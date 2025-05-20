@@ -1,21 +1,21 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useGamification } from "@/hooks/useGamification";
 
-interface StatsProps {
-  longestStreak: number;
-  currentStreak: number;
-  level: number;
-  experiencePoints: number;
-  nextLevelPoints: number;
-}
+export function HabitStats({ userId }: { userId: string | undefined }) {
+  const {
+    level,
+    experiencePoints,
+    nextLevelPoints,
+    currentStreak,
+    longestStreak,
+    achievements,
+    unlockedAchievements,
+    availableRewards,
+  } = useGamification(userId);
 
-export function HabitStats({
-  longestStreak = 14,
-  currentStreak = 7,
-  level = 5,
-  experiencePoints = 750,
-  nextLevelPoints = 1000,
-}: StatsProps) {
   const levelProgress = (experiencePoints / nextLevelPoints) * 100;
 
   return (
@@ -46,58 +46,21 @@ export function HabitStats({
 
         {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
-                <span className="text-2xl">⚡️</span>
+          {unlockedAchievements.map((achievement) => (
+            <Card key={achievement.name} className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
+                  <span className="text-2xl">{achievement.icon}</span>
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium">{achievement.name}</h4>
+                  <p className="text-sm text-gray-500">
+                    {achievement.description}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-lg font-medium">7-Day Warrior</h4>
-                <p className="text-sm text-gray-500">
-                  Completed all habits for 7 days straight
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                <span className="text-2xl">🌊</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-medium">Early Riser</h4>
-                <p className="text-sm text-gray-500">
-                  Woke up before 6:30 AM for 5 days
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-medium">Focus Master</h4>
-                <p className="text-sm text-gray-500">
-                  Completed 4+ hours of deep work for 3 days
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                <span className="text-2xl">💪</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-medium">Discipline Master</h4>
-                <p className="text-sm text-gray-500">
-                  No bad habits for 10 days straight
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          ))}
         </div>
       </div>
 
@@ -136,26 +99,51 @@ export function HabitStats({
         <Card className="p-6">
           <h3 className="text-xl font-bold mb-4">Next Achievements</h3>
           <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <span className="text-xl">🎯</span>
-              </div>
-              <div>
-                <h4 className="font-medium">14-Day Warrior</h4>
-                <p className="text-sm text-gray-500">7 days to go</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <span className="text-xl">⭐️</span>
-              </div>
-              <div>
-                <h4 className="font-medium">Level 6</h4>
-                <p className="text-sm text-gray-500">250 XP to go</p>
-              </div>
-            </div>
+            {achievements
+              .filter(
+                (a) => !unlockedAchievements.find((ua) => ua.name === a.name)
+              )
+              .slice(0, 2)
+              .map((achievement) => (
+                <div
+                  key={achievement.name}
+                  className="flex items-center space-x-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <span className="text-xl">{achievement.icon}</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{achievement.name}</h4>
+                    <p className="text-sm text-gray-500">
+                      {achievement.points} XP reward
+                    </p>
+                  </div>
+                </div>
+              ))}
           </div>
         </Card>
+
+        {/* Available Rewards */}
+        {availableRewards.length > 0 && (
+          <Card className="p-6">
+            <h3 className="text-xl font-bold mb-4">Available Rewards</h3>
+            <div className="space-y-4">
+              {availableRewards.map((reward) => (
+                <div key={reward.id} className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <span className="text-xl">🎁</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{reward.name}</h4>
+                    <p className="text-sm text-gray-500">
+                      Cost: {reward.cost} XP
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

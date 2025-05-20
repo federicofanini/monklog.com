@@ -2,6 +2,7 @@ import { DAY } from "@/lib/time";
 import { prisma } from "../prisma";
 
 interface CreateUserInput {
+  id: string;
   email: string;
   full_name: string;
   avatar_url?: string;
@@ -23,6 +24,7 @@ export async function createUser(input: CreateUserInput) {
 
     const user = await prisma.user.create({
       data: {
+        id: input.id,
         email: input.email,
         full_name: input.full_name,
         avatar_url: input.avatar_url,
