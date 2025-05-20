@@ -13,8 +13,8 @@ import { Header } from "@/components/private/users/header";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `Dashboard`,
-    template: `%s - Dashboard - ${siteConfig.name}`,
+    default: `Monk`,
+    template: `%s - Monk - ${siteConfig.name}`,
   },
   description: siteConfig.description,
 };

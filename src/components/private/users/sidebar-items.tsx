@@ -15,18 +15,18 @@ export const sidebarItems = [
   },
   {
     icon: MdAssistantPhoto,
-    label: "Monk Habits",
-    path: `/monk/habits`,
+    label: "History",
+    path: `/monk/history`,
   },
   {
     icon: MdLocationOn,
-    label: "Location",
-    path: `/business/location`,
+    label: "Log",
+    path: `/monk/log`,
   },
   {
     icon: MdPhotoLibrary,
-    label: "Gallery",
-    path: `/business/gallery`,
+    label: "Mentor",
+    path: `/monk/mentor`,
   },
   //{
   //  icon: MdSportsGymnastics,
@@ -40,12 +40,12 @@ export const sidebarItems = [
   //},
   {
     icon: MdBatchPrediction,
-    label: "Feedback",
-    path: `/business/feedback`,
+    label: "Profile",
+    path: `/monk/profile`,
   },
   {
     icon: MdAppShortcut,
-    label: "Mobile App",
-    path: `/business/mobile-app`,
+    label: "Settings",
+    path: `/monk/settings`,
   },
 ];
