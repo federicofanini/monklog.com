@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   generateHabits,
   saveGeneratedHabits,
-} from "@/app/(private)/(users)/monk/habits/actions";
+} from "@/app/(private)/(admin)/(users)/monk/habits/actions";
 import type { GeneratedHabitsResponse } from "@/packages/ai/habits/habit-service";
 
 interface HabitGeneratorProps {

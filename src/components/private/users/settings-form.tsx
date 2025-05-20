@@ -8,8 +8,8 @@ import {
   updateSettings,
   resetProgress,
   deleteAccount,
-} from "@/app/(private)/(users)/monk/settings/actions";
-import type { UpdateSettingsInput } from "@/app/(private)/(users)/monk/settings/actions";
+} from "@/app/(private)/(admin)/(users)/monk/settings/actions";
+import type { UpdateSettingsInput } from "@/app/(private)/(admin)/(users)/monk/settings/actions";
 import { useRouter } from "next/navigation";
 import { paths } from "@/lib/path";
 

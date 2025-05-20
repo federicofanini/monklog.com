@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { MentorMessage, MentorPersona } from "@prisma/client";
-import { sendMentorMessage } from "@/app/(private)/(users)/monk/mentor/actions";
+import { sendMentorMessage } from "@/app/(private)/(admin)/(users)/monk/mentor/actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 
