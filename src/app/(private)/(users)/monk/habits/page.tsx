@@ -1,4 +1,4 @@
-import { HabitTracker } from "@/components/private/users/habits/habit-tracker";
+import { HabitTracker } from "@/components/private/users/habits/track/habit-tracker";
 
 export default async function Page() {
   return (

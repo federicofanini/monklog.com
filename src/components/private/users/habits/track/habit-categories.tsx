@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useMemo, memo } from "react";
-import { CATEGORY_ICONS, Habit } from "./types";
+import { CATEGORY_ICONS, Habit } from "../types";
 import { HabitCard } from "./habit-card";
-import { handleHabitToggle } from "./stats/actions";
+import { handleHabitToggle } from "../stats/actions";
 
 // Optimized Category Section with memo
 const CategorySection = memo(function CategorySection({

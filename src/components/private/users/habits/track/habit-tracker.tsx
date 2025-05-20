@@ -4,7 +4,7 @@ import { getUserHabits } from "@/packages/database/user/habits";
 import { HabitProgress } from "./habit-progress";
 import { HabitCategories } from "./habit-categories";
 import { useEffect, useState } from "react";
-import { Habit } from "./types";
+import { Habit } from "../types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function HabitTracker() {

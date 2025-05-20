@@ -1,117 +1,51 @@
 import {
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react";
-import { paths } from "@/lib/path";
+  MdBatchPrediction,
+  MdAppShortcut,
+  MdPhotoLibrary,
+  MdLocationOn,
+  MdMan4,
+  MdAssistantPhoto,
+} from "react-icons/md";
 
-export const data = {
-  navMain: [
-    {
-      title: "Admin",
-      url: paths.admin.home,
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Habits",
-      url: paths.admin.habits,
-      icon: ListIcon,
-    },
-    {
-      title: "Monks",
-      url: paths.admin.monks,
-      icon: UsersIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
-  ],
-};
+export const sidebarItems = [
+  {
+    icon: MdMan4,
+    label: "Monk Mode",
+    path: `/admin`,
+  },
+  {
+    icon: MdAssistantPhoto,
+    label: "Monk Habits",
+    path: `/admin/habits`,
+  },
+  {
+    icon: MdLocationOn,
+    label: "Location",
+    path: `/business/location`,
+  },
+  {
+    icon: MdPhotoLibrary,
+    label: "Gallery",
+    path: `/business/gallery`,
+  },
+  //{
+  //  icon: MdSportsGymnastics,
+  //  label: "Athletes",
+  //  path: `/business/athletes`,
+  //},
+  //{
+  //  icon: Dumbbell,
+  //  label: "Workouts",
+  //  path: `/business/workouts`,
+  //},
+  {
+    icon: MdBatchPrediction,
+    label: "Feedback",
+    path: `/business/feedback`,
+  },
+  {
+    icon: MdAppShortcut,
+    label: "Mobile App",
+    path: `/business/mobile-app`,
+  },
+];

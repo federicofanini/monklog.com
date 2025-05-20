@@ -3,30 +3,171 @@ description: App Context Scope
 globs: 
 alwaysApply: false
 ---
-I'm building an app called **MonkLog** — a simple public habit tracker for founders, creators, and builders in “monk mode”.
+Let’s paint a crystal-clear UX/UI vision of **Monk Mode Mentor** — a focused, minimal, powerful app that feels like a **military-grade coach in your pocket**.
 
-It’s not a traditional productivity tool. It’s a public digital battle log that tracks discipline and transformation.
+This is not another productivity app. It’s a dojo.
 
-💡 The app should let users:
-- Track 5 daily habits (Wake early, No smoke, Train, Build, Sleep 7h)
-- Log notes ("Today I trained, built 6h, no cravings")
-- See a daily streak count
-- Have a public profile (e.g. monklog.app/federico)
-- Auto-generate a daily OG image to share on Twitter/X
+---
 
-⚙️ Stack:
-- **Next.js App Router**
-- **Tailwind + Shadcn UI**
-- **Supabase** (DB)
-- **Kinde Auth** Auth provider
-- **Stripe** (Pro plan: $5/month unlocks squads, analytics, AI assistant)
-- **Deployed on Vercel**
-- **Upstash Redis** for fast streaks
-- **Resend** for email reminders
+## 🧭 OVERALL UX PHILOSOPHY
 
-Start by scaffolding the app structure:
-- `app/` folder (App Router)
-- Auth with Kinde Auth
-- Dashboard to track habits
-- Public profile route (`/[username]`)
-- OG image route (`/api/og`)
+* **One screen = one intention**
+* Minimal. Fast. Bold. Dark theme by default.
+* No infinite scroll, no notifications. Only **truth, tracking, and transformation.**
+
+The user wakes up, gets their **mission**, lives the day, comes back, **logs the truth**, and the **mentor responds**.
+
+---
+
+## 🔥 KEY FLOWS (UX)
+
+### 🔁 **1. Daily Loop (Core UX)**
+
+> Morning → Do the work → Night → Log → Get mentored
+
+#### **a) Morning Screen**
+
+* ✅ “Day X of Monk Mode”
+* 🧠 Quote of the day from mentor persona
+* 🔥 “Your mission today: \[Run 4km. No social until 5PM.]”
+* \[Acknowledge button] → “Let’s go.”
+
+---
+
+#### **b) Habit Checklist (Home)**
+
+Simple checklist UI with 5 habits (icons + labels):
+
+\| ✅ | Wake Early         |
+\| ✅ | No Smoke           |
+\| ⬜ | Workout            |
+\| ⬜ | 4h Deep Work       |
+\| ⬜ | Sleep 7h           |
+
+* Sticky streak counter at the top
+* Subtle progress ring animation
+* Button: `Log My Day`
+
+---
+
+#### **c) Daily Log Screen**
+
+> “How did you show up today?”
+> Textarea input. Optional emotion selector (1–5).
+
+> “Did you relapse on anything?”
+> Checkboxes: smoke / scrolling / skipped mission
+
+* Submit → loading shimmer → AI mentor response loads
+
+---
+
+#### **d) AI Mentor Response UI**
+
+* Bubble-style text or message card:
+
+> *“You skipped your workout. You know why. Don’t lie to yourself. Tomorrow, double the work. Stay sharp.”*
+
+* Response has:
+
+  * 💬 Feedback line
+  * 🧠 Insight / reflection
+  * ⚔️ Tomorrow’s Challenge
+
+> Optional: `Save this log` to timeline / share on X
+
+---
+
+## 🎯 OTHER UX COMPONENTS
+
+### 📅 **Streak + Progress Bar**
+
+* Fire-styled streak number (e.g. 🔥 Day 13)
+* XP ring fills in as habits complete
+* “Mental toughness streak” below (days since last relapse)
+
+---
+
+### 🛡️ **Mentor Persona Switcher (Pro)**
+
+* Page with 4 persona cards (selectable)
+* Description, tone sample, sample message
+* E.g.:
+
+\| 👤 | **The Ghost**
+\| — | *"Train. Or stay soft."*
+\| 💀 | 1-line, ruthless, no fluff |
+
+---
+
+### 🧱 **Logs Timeline**
+
+* Vertical scroll of past days:
+
+  * Summary
+  * ✅ habits completed
+  * Mentor reply
+  * Mood score
+
+> Optional filter: "Show only my best days" or "show relapses"
+
+---
+
+### 🧵 **Public Card / Sharing UX**
+
+* One-click generate “Monk Mode Day X” image
+* \[Copy link] / \[Post on X] button
+* Card design: bold type, streak, 3 habits, mentor quote
+
+---
+
+## 🎨 UI STYLE GUIDE
+
+* **Color Palette:**
+
+  * Background: Deep black / dark gray
+  * Primary: Crimson red (#D62828)
+  * Accent: White / Iron Gray (#EEEEEE)
+  * Mood color ring: Blue (cold), Red (high), Gray (burnt)
+
+* **Typography:**
+
+  * Headings: Tall, bold sans-serif (e.g., Inter, Satoshi)
+  * Quotes / mentor logs: Monospace or stylized serif
+  * All caps used sparingly — only for power moments
+
+* **Iconography:**
+
+  * 🔥 Streak
+  * 🧠 Mind
+  * 🩸 Relapse
+  * ⚔️ Challenge
+  * 💬 Mentor
+
+---
+
+## 💻 Devices
+
+* **Mobile-first**
+* Responsive for desktop
+* Ideal UX = open 2x/day, \~2 min each
+* Optional: Telegram integration for challenge of the day
+
+---
+
+## 🧪 Feel of the App
+
+* Opening the app = entering a dojo
+* Feels private, raw, powerful
+* Everything you check, write, or submit makes you feel more **in control**
+* Your mentor doesn't flatter — it shapes you
+
+---
+
+Want me to:
+
+* Turn this into a Figma wireframe plan?
+* Write your Shadcn component map (UI)?
+* Sketch mobile flow in Markdown with code blocks?
+
+Let’s make this thing not just useful — **addictive for killers**.

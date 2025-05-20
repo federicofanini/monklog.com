@@ -2,8 +2,8 @@
 
 import { Card } from "@/components/ui/card";
 import { useTransition, useOptimistic } from "react";
-import { formatHabitName } from "../../../../lib/format-habit-name";
-import { Habit, HabitToggleResponse } from "./types";
+import { formatHabitName } from "../../../../../lib/format-habit-name";
+import { Habit, HabitToggleResponse } from "../types";
 import { toast } from "sonner";
 
 export function HabitCard({
