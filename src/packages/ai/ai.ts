@@ -50,22 +50,29 @@ export function createUserMessage(input: {
   habits: { name: string; completed: boolean; relapsed: boolean }[];
   reflection?: string;
 }): Message {
-  const habitsStatus = input.habits
-    .map(
-      (h) =>
-        `${h.name}: ${h.completed ? "✅" : "❌"}${
-          h.relapsed ? " (RELAPSED)" : ""
-        }`
-    )
-    .join("\n");
+  const habitsStatus =
+    input.habits.length > 0
+      ? `Habits:\n${input.habits
+          .map(
+            (h) =>
+              `${h.name}: ${h.completed ? "✅" : "❌"}${
+                h.relapsed ? " (RELAPSED)" : ""
+              }`
+          )
+          .join("\n")}`
+      : "";
+
+  const content = [
+    `Streak: ${input.streak} days`,
+    habitsStatus,
+    input.reflection ? `Message: ${input.reflection}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   return {
     role: "user",
-    content: `
-Streak: ${input.streak} days
-Habits:
-${habitsStatus}
-${input.reflection ? `\nReflection: ${input.reflection}` : ""}`,
+    content,
     id: crypto.randomUUID(),
   };
 }

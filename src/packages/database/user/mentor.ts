@@ -38,7 +38,7 @@ export async function getMentorMessages(userId: string, limit = 5) {
 
 export async function createMentorResponse(
   userId: string,
-  habitLogId: string,
+  habitLogId: string | null | undefined,
   message: string,
   reflection?: string,
   challenge?: string
@@ -55,7 +55,7 @@ export async function createMentorResponse(
     return await prisma.mentorMessage.create({
       data: {
         userId,
-        habitLogId,
+        habitLogId: habitLogId || undefined,
         persona: user.current_mentor_persona,
         message,
         reflection,

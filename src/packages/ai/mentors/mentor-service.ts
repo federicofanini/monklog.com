@@ -37,21 +37,32 @@ export class MentorService {
   }
 
   private getCacheKey(input: MentorInput): string {
-    return `${CACHE_PREFIX}${input.userId}:${input.habitLogId}`;
+    // Include the reflection in the cache key to differentiate between different messages
+    const messageHash = input.reflection
+      ? Buffer.from(input.reflection).toString("base64").slice(0, 32)
+      : "no-message";
+    return `${CACHE_PREFIX}${input.userId}:${input.habitLogId}:${messageHash}`;
   }
 
   private async getCachedResponse(key: string): Promise<MentorResponse | null> {
-    return kv.get(key);
+    // Only use cache for habit logs, not for chat messages
+    if (key.includes(":no-message:")) {
+      return kv.get(key);
+    }
+    return null;
   }
 
   private async cacheResponse(
     key: string,
     response: MentorResponse
   ): Promise<void> {
-    await kv.set(key, response, { ex: DEFAULT_CACHE_TIMEOUT });
+    // Only cache habit logs, not chat messages
+    if (key.includes(":no-message:")) {
+      await kv.set(key, response, { ex: DEFAULT_CACHE_TIMEOUT });
+    }
   }
 
-  public async generateResponse(input: MentorInput) {
+  public async *generateResponse(input: MentorInput): AsyncGenerator<string> {
     try {
       // Check rate limit
       const withinLimit = await this.checkRateLimit(input.userId);
@@ -61,11 +72,6 @@ export class MentorService {
           message: "Daily mentor interaction limit reached",
         } as MentorError;
       }
-
-      // Check cache
-      const cacheKey = this.getCacheKey(input);
-      const cached = await this.getCachedResponse(cacheKey);
-      if (cached) return cached;
 
       // Get mentor prompt
       const prompt = mentorPrompts[input.persona];
@@ -81,7 +87,7 @@ export class MentorService {
         createSystemMessage(prompt),
         createUserMessage({
           streak: input.streak,
-          habits: input.habits,
+          habits: input.habits || [],
           reflection: input.reflection,
         }),
       ];
@@ -89,22 +95,61 @@ export class MentorService {
       // Generate streaming response
       const stream = await streamingCompletion(messages);
 
-      // Store interaction in database asynchronously
-      prisma.mentorMessage
-        .create({
-          data: {
-            userId: input.userId,
-            habitLogId: input.habitLogId,
-            persona: input.persona,
-            message: "Streaming response",
-            challenge: "Streaming response",
-          },
-        })
-        .catch((error) => {
-          console.error("Failed to store mentor message:", error);
-        });
+      // Process the stream and extract message and challenge
+      let fullMessage = "";
+      let challenge = "";
+      let isInChallenge = false;
 
-      return stream;
+      for await (const chunk of stream) {
+        const text = chunk.toString().trim();
+
+        // Skip empty chunks
+        if (!text) continue;
+
+        // Check for challenge section
+        if (text.toLowerCase().includes("challenge:")) {
+          isInChallenge = true;
+          const [, challengeText] = text.split(/challenge:/i);
+          if (challengeText) {
+            challenge = challengeText.trim();
+          }
+          continue;
+        }
+
+        // Add to appropriate section
+        if (isInChallenge) {
+          challenge += (challenge ? " " : "") + text;
+        } else {
+          fullMessage += (fullMessage ? " " : "") + text;
+        }
+
+        // Yield the chunk for streaming
+        yield text;
+      }
+
+      // Clean up the response
+      fullMessage = fullMessage.trim();
+      challenge = challenge.trim();
+
+      // Store the complete message in the database
+      await prisma.mentorMessage.create({
+        data: {
+          userId: input.userId,
+          habitLogId: input.habitLogId,
+          persona: input.persona,
+          message: fullMessage,
+          challenge: challenge || undefined,
+        },
+      });
+
+      // Only cache if this is a habit log response
+      const cacheKey = this.getCacheKey(input);
+      if (cacheKey.includes(":no-message:")) {
+        await this.cacheResponse(cacheKey, {
+          truth: fullMessage,
+          challenge,
+        });
+      }
     } catch (error) {
       console.error("Mentor service error:", error);
       throw {

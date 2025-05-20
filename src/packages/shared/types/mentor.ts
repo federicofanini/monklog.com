@@ -8,7 +8,7 @@ export interface MentorResponse {
 
 export interface MentorInput {
   userId: string;
-  habitLogId: string;
+  habitLogId?: string | null;
   streak: number;
   habits: {
     name: string;
