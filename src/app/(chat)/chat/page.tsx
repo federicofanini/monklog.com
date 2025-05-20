@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
+import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
 
 export default function ChatPage() {
   const [mentor, setMentor] = useState<MentorType>("MONK");
@@ -125,6 +126,13 @@ export default function ChatPage() {
                   </div>
                 </div>
               ))
+            )}
+
+            {/* Show upgrade prompt when limit is reached */}
+            {remainingMessages === 0 && (
+              <div className="mt-8">
+                <UpgradePrompt />
+              </div>
             )}
           </div>
         </ScrollArea>

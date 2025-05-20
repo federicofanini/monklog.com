@@ -34,7 +34,7 @@ export function UpgradePrompt() {
           <p className="text-sm text-white/70">Priority response time</p>
         </div>
       </div>
-      <Link href={paths.pricing || "#"} className="mt-6 block">
+      <Link href={paths.marketing.pricing} className="mt-6 block">
         <Button className="w-full bg-red-500 font-mono text-sm hover:bg-red-600">
           UPGRADE NOW
         </Button>
