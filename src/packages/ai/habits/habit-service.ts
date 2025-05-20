@@ -1,4 +1,4 @@
-import { habitGeneratorPrompt } from "../habits/habit-generator";
+import { habitGeneratorPrompt } from "./habit-generator";
 import { createSystemMessage, streamingJsonCompletion } from "../ai";
 import { Message } from "ai";
 

@@ -3,4 +3,4 @@ export * from "./daily-log";
 export * from "./mentor";
 export * from "./profile";
 export * from "./habits";
-export * from "../../shared/types/types";
+export * from "./onboard";

@@ -1,3 +1,5 @@
+"use server";
+
 import { HOUR } from "@/lib/time";
 import { prisma } from "../prisma";
 import { MentorPersona } from "@prisma/client";

@@ -1,6 +1,29 @@
+"use server";
+
 import { HOUR } from "@/lib/time";
 import { prisma } from "../prisma";
-import type { DailyLogInput, DailyLogResponse } from "../../shared/types/types";
+import type {
+  HabitLog,
+  HabitEntry,
+  Habit,
+  MentorMessage,
+} from "@prisma/client";
+
+export interface DailyLogInput {
+  note?: string;
+  moodScore?: number;
+  habitIds: string[];
+  relapseIds: string[];
+}
+
+export interface DailyLogResponse {
+  log: HabitLog;
+  entries: {
+    entry: HabitEntry;
+    habit: Habit;
+  }[];
+  mentor_response: MentorMessage | null;
+}
 
 export async function createDailyLog(
   userId: string,
@@ -10,6 +33,21 @@ export async function createDailyLog(
   today.setHours(0, 0, 0, 0);
 
   try {
+    // Check if log already exists for today
+    const existingLog = await prisma.habitLog.findUnique({
+      where: {
+        userId_date: {
+          userId,
+          date: today,
+        },
+      },
+    });
+
+    if (existingLog) {
+      throw new Error("Daily log already exists for today");
+    }
+
+    // Create new log with entries
     const log = await prisma.habitLog.create({
       data: {
         userId,
@@ -42,7 +80,7 @@ export async function createDailyLog(
     });
 
     // Update user stats
-    await prisma.dailyStats.create({
+    const stats = await prisma.dailyStats.create({
       data: {
         userId,
         date: today,
@@ -50,8 +88,37 @@ export async function createDailyLog(
         habits_relapsed: input.relapseIds.length,
         streak_maintained: input.habitIds.length > 0,
         mental_toughness_gained: calculateMentalToughness(input),
+        experience_gained: calculateExperiencePoints(input),
       },
     });
+
+    // Update user's streak and mental toughness
+    if (stats.streak_maintained) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          current_streak: { increment: 1 },
+          total_streaks: { increment: 1 },
+          mental_toughness_score: {
+            increment: Math.min(
+              stats.mental_toughness_gained,
+              100 - (await getCurrentMentalToughness(userId))
+            ),
+          },
+          experience_points: {
+            increment: stats.experience_gained,
+          },
+        },
+      });
+    } else {
+      // Reset streak on failure
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          current_streak: 0,
+        },
+      });
+    }
 
     return {
       log,
@@ -146,6 +213,23 @@ export async function getTodayLog(
 function calculateMentalToughness(input: DailyLogInput): number {
   let points = 0;
   points += input.habitIds.length * 10; // Points for completed habits
-  points -= input.relapseIds.length * 5; // Penalty for relapses
+  points -= input.relapseIds.length * 15; // Bigger penalty for relapses
   return Math.max(0, points); // Ensure non-negative
+}
+
+// Helper function to calculate experience points
+function calculateExperiencePoints(input: DailyLogInput): number {
+  let points = 0;
+  points += input.habitIds.length * 50; // Base XP for completed habits
+  points -= input.relapseIds.length * 100; // XP penalty for relapses
+  return Math.max(0, points); // Ensure non-negative
+}
+
+// Helper function to get current mental toughness
+async function getCurrentMentalToughness(userId: string): Promise<number> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { mental_toughness_score: true },
+  });
+  return user?.mental_toughness_score || 0;
 }

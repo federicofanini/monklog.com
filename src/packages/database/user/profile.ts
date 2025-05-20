@@ -1,12 +1,59 @@
+"use server";
+
 import { HOUR } from "@/lib/time";
 import { prisma } from "../prisma";
 import type {
-  UserProfile,
+  User,
   UserSettings,
-  UserSettingsInput,
-  UserStats,
+  Mission,
+  Achievement,
   UserAchievement,
-} from "../../shared/types/types";
+} from "@prisma/client";
+
+// Type definitions
+export interface UserProfile {
+  user: User;
+  settings: UserSettings | null;
+  achievements: {
+    achievement: Achievement;
+    unlocked_at: Date;
+  }[];
+  currentMission?: {
+    mission: Mission;
+    progress: {
+      current_day: number;
+      completed: boolean;
+    };
+  };
+}
+
+export interface UserSettingsInput {
+  morningCheckinEnabled: boolean;
+  eveningLogEnabled: boolean;
+  mentorMessagesEnabled: boolean;
+  aggressiveToneEnabled: boolean;
+  dailyChallengesEnabled: boolean;
+  publicProfile: boolean;
+  shareProgress: boolean;
+}
+
+export interface UserStats {
+  stats: {
+    date: Date;
+    experience_gained: number;
+    habits_completed: number;
+    habits_relapsed: number;
+    streak_maintained: boolean;
+    mental_toughness_gained: number;
+  }[];
+  currentMission?: {
+    mission: Mission;
+    progress: {
+      current_day: number;
+      completed: boolean;
+    };
+  };
+}
 
 export async function getUserProfile(userId: string): Promise<UserProfile> {
   try {
@@ -46,7 +93,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
       currentMission: currentMission
         ? {
             mission: currentMission.mission,
-            progress: currentMission,
+            progress: {
+              current_day: currentMission.current_day,
+              completed: currentMission.completed,
+            },
           }
         : undefined,
     };
@@ -117,7 +167,10 @@ export async function getUserStats(userId: string): Promise<UserStats> {
       currentMission: currentMission
         ? {
             mission: currentMission.mission,
-            progress: currentMission,
+            progress: {
+              current_day: currentMission.current_day,
+              completed: currentMission.completed,
+            },
           }
         : undefined,
     };

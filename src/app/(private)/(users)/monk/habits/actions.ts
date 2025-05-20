@@ -7,7 +7,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
   HabitGeneratorService,
   type GeneratedHabit,
-} from "@/packages/ai/mentors/habit-service";
+} from "@/packages/ai/habits/habit-service";
 
 export async function updateUserHabits(habitIds: string[]) {
   const { getUser } = await getKindeServerSession();
@@ -161,5 +161,71 @@ export async function saveGeneratedHabits(habits: GeneratedHabit[]) {
   } catch (error) {
     console.error("Error saving generated habits:", error);
     return { success: false, error: "Failed to save habits" };
+  }
+}
+
+export async function deleteHabits() {
+  const { getUser } = await getKindeServerSession();
+  const user = await getUser();
+
+  if (!user?.id) {
+    return { success: false, error: "User not authenticated" };
+  }
+
+  try {
+    // Get today's log
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get the user's current habit log
+    const currentLog = await prisma.habitLog.findUnique({
+      where: {
+        userId_date: {
+          userId: user.id,
+          date: today,
+        },
+      },
+      include: {
+        entries: {
+          include: {
+            habit: true,
+          },
+        },
+      },
+    });
+
+    if (currentLog) {
+      // Get all habit IDs from the current log
+      const habitIds = currentLog.entries.map((entry) => entry.habit.id);
+
+      // Delete the habit entries
+      await prisma.habitEntry.deleteMany({
+        where: {
+          habitLogId: currentLog.id,
+        },
+      });
+
+      // Delete the habits themselves
+      await prisma.habit.deleteMany({
+        where: {
+          id: {
+            in: habitIds,
+          },
+        },
+      });
+
+      // Delete the log
+      await prisma.habitLog.delete({
+        where: {
+          id: currentLog.id,
+        },
+      });
+    }
+
+    revalidatePath(paths.monk.habits);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting habits:", error);
+    return { success: false, error: "Failed to delete habits" };
   }
 }

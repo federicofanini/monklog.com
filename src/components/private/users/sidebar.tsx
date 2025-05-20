@@ -38,7 +38,7 @@ export function Sidebar() {
         className="border-r border-primary bg-noise overflow-hidden"
       >
         <SidebarHeader className="flex justify-center items-center h-[70px] border-b border-primary">
-          <Link href="/dashboard">
+          <Link href="/monk">
             <Logo />
           </Link>
         </SidebarHeader>
@@ -62,7 +62,11 @@ export function Sidebar() {
                             })}
                           >
                             <Link href={item.path}>
-                              <item.icon />
+                              <item.icon
+                                className={cn("size-5", {
+                                  "text-red-500": item.isActive,
+                                })}
+                              />
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>

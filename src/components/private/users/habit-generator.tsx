@@ -5,30 +5,24 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { GenerateHabitsInput } from "@/app/(private)/(users)/monk/habits/actions";
+import {
+  generateHabits,
+  saveGeneratedHabits,
+} from "@/app/(private)/(users)/monk/habits/actions";
+import type { GeneratedHabitsResponse } from "@/packages/ai/habits/habit-service";
 
-interface GeneratorResult {
-  habits: {
-    id: string;
-    name: string;
-    categoryId: string;
-    icon: string | null;
-    is_relapsable: boolean;
-    order: number;
-  }[];
-  explanation: string;
+interface HabitGeneratorProps {
+  onGenerated?: () => void;
 }
 
-export function HabitGenerator({ onGenerated }: { onGenerated?: () => void }) {
+export function HabitGenerator({ onGenerated }: HabitGeneratorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [streamedText, setStreamedText] = useState<string>("");
-  const [result, setResult] = useState<GeneratorResult | null>(null);
+  const [result, setResult] = useState<GeneratedHabitsResponse | null>(null);
 
   async function onSubmit(formData: FormData) {
     setIsLoading(true);
     setError(null);
-    setStreamedText("");
     setResult(null);
 
     try {
@@ -45,53 +39,30 @@ export function HabitGenerator({ onGenerated }: { onGenerated?: () => void }) {
           .get("constraints")
           ?.toString()
           .split(",")
-          .map((c) => c.trim()) || [];
+          .map((c) => c.trim())
+          .filter(Boolean) || [];
 
-      const input: GenerateHabitsInput = {
+      // Generate habits using server action
+      const generatedResult = await generateHabits({
         goals,
         timeCommitment,
-        constraints: constraints.filter(Boolean),
-      };
-
-      // Start the streaming response
-      const response = await fetch("/api/habits/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(input),
+        constraints,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate habits");
+      if (!generatedResult.success || !("habits" in generatedResult)) {
+        throw new Error(generatedResult.error || "Failed to generate habits");
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("No response stream available");
-      }
-
-      // Read the stream
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Convert the chunk to text and update the UI
-        const text = new TextDecoder().decode(value);
-        setStreamedText((prev) => prev + text);
-      }
-
-      // Parse the final response
-      const jsonResponse = await response.json();
-      if (!jsonResponse.success) {
-        throw new Error(jsonResponse.error);
+      // Save the generated habits
+      const savedResult = await saveGeneratedHabits(generatedResult.habits);
+      if (!savedResult.success) {
+        throw new Error(savedResult.error);
       }
 
       setResult({
-        habits: jsonResponse.habits,
-        explanation: jsonResponse.explanation,
+        habits: generatedResult.habits,
+        explanation: generatedResult.explanation,
       });
-
       onGenerated?.();
     } catch (err) {
       console.error("Error generating habits:", err);
@@ -165,22 +136,13 @@ export function HabitGenerator({ onGenerated }: { onGenerated?: () => void }) {
 
         {error && <div className="text-sm text-red-500">{error}</div>}
 
-        {streamedText && (
-          <div className="text-sm text-muted-foreground font-mono border border-white/10 rounded-md p-4 bg-black/20">
-            {streamedText}
-          </div>
-        )}
-
         {result && (
           <div className="space-y-4 border-t border-white/10 pt-4">
             <div className="space-y-2">
               <h4 className="font-medium">Generated Habits</h4>
               <div className="space-y-2">
-                {result.habits.map((habit) => (
-                  <div
-                    key={habit.id}
-                    className="flex items-center gap-2 text-sm"
-                  >
+                {result.habits.map((habit, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
                     <span>{habit.icon}</span>
                     <span className="font-medium">{habit.name}</span>
                   </div>

@@ -2,12 +2,19 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getUserHabits } from "@/packages/database/user/habits";
 import { HabitConfig } from "@/components/private/users/habit-config";
+import { HabitTimeline } from "@/components/private/users/habit-timeline";
 import { HabitGeneratorWrapper } from "@/components/private/users/habit-generator-wrapper";
-import { updateUserHabits } from "./actions";
+import { updateUserHabits, deleteHabits } from "./actions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function HabitsPage() {
   try {
     const habits = await getUserHabits();
+
+    async function handleDelete() {
+      "use server";
+      await deleteHabits();
+    }
 
     return (
       <div className="container max-w-2xl py-8 space-y-8 mx-auto">
@@ -23,18 +30,44 @@ export default async function HabitsPage() {
           <HabitGeneratorWrapper />
         ) : (
           <>
-            <HabitConfig
-              habits={habits}
-              onSave={async (habitIds) => {
-                "use server";
-                await updateUserHabits(habitIds);
-              }}
-            />
+            <div className="flex justify-between items-center">
+              <Tabs defaultValue="timeline" className="w-full space-y-6">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="timeline">Timeline View</TabsTrigger>
+                  <TabsTrigger value="list">List View</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="timeline">
+                  <HabitTimeline habits={habits} />
+                </TabsContent>
+
+                <TabsContent value="list">
+                  <HabitConfig
+                    habits={habits}
+                    onSave={async (habitIds) => {
+                      "use server";
+                      await updateUserHabits(habitIds);
+                    }}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
 
             <div className="pt-4">
               <Card className="p-6 bg-black/40">
                 <div className="space-y-4">
-                  <h3 className="font-mono text-red-500">NEED A RESET?</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-mono text-red-500">NEED A RESET?</h3>
+                    <form action={handleDelete}>
+                      <Button
+                        type="submit"
+                        variant="destructive"
+                        className="bg-red-900 hover:bg-red-800 text-sm"
+                      >
+                        Delete All Habits
+                      </Button>
+                    </form>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     Let the AI mentor design a new strategic habit system based
                     on your current goals and constraints.

@@ -1,3 +1,5 @@
+"use server";
+
 import { DAY } from "@/lib/time";
 import { prisma } from "../prisma";
 

@@ -18,6 +18,12 @@ interface HabitConfigProps {
   onSave: (selectedHabits: string[]) => void;
 }
 
+const TIME_BLOCK_ICONS = {
+  morning: "🌅",
+  midday: "☀️",
+  evening: "🌙",
+};
+
 export function HabitConfig({ habits, onSave }: HabitConfigProps) {
   const [selectedHabits, setSelectedHabits] = useState<string[]>(
     habits.filter((h) => h.isTracked).map((h) => h.id)
@@ -59,25 +65,44 @@ export function HabitConfig({ habits, onSave }: HabitConfigProps) {
                     onCheckedChange={() => handleToggleHabit(habit.id)}
                   />
                   <div className="flex-1">
-                    <label
-                      htmlFor={habit.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
+                    <div className="flex items-center gap-2">
                       {habit.icon && (
                         <span
-                          className="mr-2"
+                          className="text-lg"
                           role="img"
                           aria-label={habit.name}
                         >
                           {habit.icon}
                         </span>
                       )}
-                      {habit.name}
-                    </label>
+                      <label
+                        htmlFor={habit.id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {habit.name}
+                      </label>
+                    </div>
+                    {habit.criteria && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {habit.criteria}
+                      </p>
+                    )}
                   </div>
-                  {habit.is_relapsable && (
-                    <span className="text-xs text-red-500">Relapsable</span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <span>
+                        {
+                          TIME_BLOCK_ICONS[
+                            habit.time_block as keyof typeof TIME_BLOCK_ICONS
+                          ]
+                        }
+                      </span>
+                      <span>{habit.minutes}m</span>
+                    </div>
+                    {habit.is_relapsable && (
+                      <span className="text-xs text-red-500">Relapsable</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

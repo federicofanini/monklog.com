@@ -9,7 +9,7 @@ export async function SettingsButton() {
       size="icon"
       className="[&>svg]:size-5 size-[70px] hidden md:flex items-center justify-center border-r border-l border-primary rounded-none"
     >
-      <Link href="/business/settings">
+      <Link href="/monk/settings">
         <Settings />
       </Link>
     </Button>

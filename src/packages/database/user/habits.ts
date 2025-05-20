@@ -1,3 +1,5 @@
+"use server";
+
 import { HOUR } from "@/lib/time";
 import { prisma } from "../prisma";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
