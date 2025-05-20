@@ -1,3 +1,7 @@
+// Re-export Prisma's MentorPersona enum
+import type { MentorPersona } from "@prisma/client";
+export { MentorPersona };
+
 // Enums
 export enum Role {
   MONK = "MONK",
@@ -7,13 +11,6 @@ export enum Role {
 export enum PlanName {
   FREE = "FREE",
   PRO = "PRO",
-}
-
-export enum MentorPersona {
-  GHOST = "GHOST",
-  WARRIOR = "WARRIOR",
-  MONK = "MONK",
-  SHADOW = "SHADOW",
 }
 
 // Input Types

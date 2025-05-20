@@ -12,7 +12,7 @@ import {
   streamingCompletion,
   createSystemMessage,
   createUserMessage,
-} from "../openai";
+} from "../ai";
 import { kv } from "@/packages/kv/redis";
 import { prisma } from "@/packages/database/prisma";
 
