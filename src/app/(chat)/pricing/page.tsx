@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const features = [
   "Unlimited daily messages",
@@ -41,6 +42,21 @@ const plans = [
 
 export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>("Yearly");
+
+  const handlePurchase = async (priceId: string) => {
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: priceId }),
+      });
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to start checkout process");
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950">
@@ -137,8 +153,7 @@ export default function PricingPage() {
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Will integrate Stripe here later
-                    console.log(`Selected plan: ${plan.name}`);
+                    handlePurchase(plan.name);
                   }}
                 >
                   {plan.name === selectedPlan ? (
