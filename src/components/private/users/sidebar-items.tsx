@@ -1,10 +1,10 @@
 import {
   MdBatchPrediction,
   MdAppShortcut,
-  MdBusiness,
   MdPhotoLibrary,
   MdLocationOn,
   MdMan4,
+  MdBarChart,
 } from "react-icons/md";
 
 export const sidebarItems = [
@@ -14,9 +14,9 @@ export const sidebarItems = [
     path: `/monk`,
   },
   {
-    icon: MdBusiness,
-    label: "Profile",
-    path: `/business/profile`,
+    icon: MdBarChart,
+    label: "Monk Stats",
+    path: `/monk/stats`,
   },
   {
     icon: MdLocationOn,

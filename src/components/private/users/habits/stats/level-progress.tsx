@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 interface LevelProgressProps {
@@ -17,25 +16,22 @@ export function LevelProgress({
   const levelProgress = (experiencePoints / nextLevelPoints) * 100;
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-3xl font-bold">Level {level}</h3>
-          <p className="text-sm text-gray-500">Monk Warrior</p>
-        </div>
-        <div className="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-          <span className="text-3xl">🏆</span>
+          <p className="text-sm text-muted-foreground mb-1">Current Level</p>
+          <h3 className="text-3xl font-medium">{level}</h3>
         </div>
       </div>
-      <div className="space-y-3">
-        <div className="flex justify-between text-sm">
-          <span className="font-medium">XP Progress</span>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>Progress</span>
           <span>
-            {experiencePoints}/{nextLevelPoints} XP
+            {experiencePoints}/{nextLevelPoints}
           </span>
         </div>
-        <Progress value={levelProgress} className="h-3" />
+        <Progress value={levelProgress} className="h-2" />
       </div>
-    </Card>
+    </div>
   );
 }
