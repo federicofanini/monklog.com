@@ -2,16 +2,21 @@ export interface Habit {
   id: string;
   name: string;
   category: {
-    name: string;
     id: string;
+    name: string;
   };
   order: number;
   completedToday: boolean;
+  streak?: number;
 }
 
+export type HabitToggleResponse =
+  | { success: true; completed: boolean }
+  | { error: string; message: string };
+
 export const CATEGORY_ICONS: Record<string, string> = {
-  "Mind & Discipline": "🧠",
-  "Body & Energy": "💪",
-  "Work & Purpose": "🛠️",
+  "Mind & Spirit": "🧘‍♂️",
+  "Health & Fitness": "💪",
+  "Work & Skills": "💼",
   "Optional High-Level": "🧘",
 };

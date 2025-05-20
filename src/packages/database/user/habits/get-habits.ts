@@ -1,58 +1,128 @@
 "use server";
 
-import { prisma } from "../../prisma";
-import { startOfDay } from "date-fns";
+import { prisma } from "@/packages/database/prisma";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-import { paths } from "@/lib/path";
+import { startOfDay } from "date-fns";
+
 export async function getUserHabits() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  if (!user || !user.id) {
-    redirect(paths.api.login);
+  if (!user?.id) {
+    return null;
   }
 
-  const userId = user.id;
+  const today = startOfDay(new Date());
 
   try {
-    // Get all habits with their categories
     const habits = await prisma.habit.findMany({
+      orderBy: [{ category: { name: "asc" } }, { order: "asc" }],
       include: {
-        category: true,
-      },
-      orderBy: {
-        order: "asc",
-      },
-    });
-
-    // Get today's habit log for the user
-    const today = new Date();
-    const todayLog = await prisma.habitLog.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date: startOfDay(today),
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        entries: {
+          where: {
+            log: {
+              userId: user.id,
+              date: today,
+            },
+          },
+          select: {
+            completed: true,
+          },
+          take: 1,
         },
       },
-      include: {
-        entries: true,
-      },
     });
 
-    // Map habits with their completion status
     return habits.map((habit) => ({
-      ...habit,
-      completedToday:
-        todayLog?.entries.some(
-          (entry) => entry.habitId === habit.id && entry.completed
-        ) || false,
+      id: habit.id,
+      name: habit.name,
+      category: {
+        id: habit.category.id,
+        name: habit.category.name,
+      },
+      order: habit.order,
+      completedToday: habit.entries[0]?.completed ?? false,
     }));
   } catch (error) {
-    console.error("Error fetching user habits:", error);
-    throw error;
+    console.error("Error fetching habits:", error);
+    return null;
   }
 }
+
+export const toggleHabitCompletion = async (habitId: string) => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user?.id) {
+    return {
+      error: "unauthorized",
+      message: "You must be logged in to perform this action",
+    };
+  }
+
+  const today = startOfDay(new Date());
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // Get or create today's log
+      const log = await tx.habitLog.upsert({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: today,
+          },
+        },
+        create: {
+          userId: user.id,
+          date: today,
+        },
+        update: {},
+      });
+
+      // Get current entry state
+      const existingEntry = await tx.habitEntry.findUnique({
+        where: {
+          habitLogId_habitId: {
+            habitLogId: log.id,
+            habitId,
+          },
+        },
+      });
+
+      // Toggle or create entry
+      const entry = await tx.habitEntry.upsert({
+        where: {
+          habitLogId_habitId: {
+            habitLogId: log.id,
+            habitId,
+          },
+        },
+        create: {
+          habitLogId: log.id,
+          habitId,
+          completed: true,
+        },
+        update: {
+          completed: !existingEntry?.completed,
+        },
+      });
+
+      return { completed: entry.completed };
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error in toggleHabitCompletion:", error);
+    throw error;
+  }
+};
 
 // Get habit completion stats for a user
 export async function getHabitStats(habitId: string) {
