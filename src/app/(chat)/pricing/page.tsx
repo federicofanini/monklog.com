@@ -5,6 +5,9 @@ import { ArrowRight, Check, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import { STRIPE_PLANS } from "@/packages/stripe/config";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const features = [
   "Unlimited daily messages",
@@ -15,26 +18,30 @@ const features = [
   "Progress analytics",
 ];
 
-const plans = [
+interface PricingPlan {
+  name: string;
+  price: number;
+  interval: string;
+  priceId?: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+}
+
+const plans: PricingPlan[] = [
   {
-    name: "Monthly",
-    price: 5,
-    interval: "month",
+    ...STRIPE_PLANS.MONTHLY,
     description: "Perfect for trying out MonkLog",
     features: features,
   },
   {
-    name: "Yearly",
-    price: 50,
-    interval: "year",
+    ...STRIPE_PLANS.YEARLY,
     description: "Our most popular plan",
     features: features,
     popular: true,
   },
   {
-    name: "Lifetime",
-    price: 85,
-    interval: "one-time",
+    ...STRIPE_PLANS.LIFETIME,
     description: "Best value for long-term growth",
     features: features,
   },
@@ -42,19 +49,62 @@ const plans = [
 
 export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>("Yearly");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handlePurchase = async (priceId: string) => {
+  useEffect(() => {
+    // Handle success/cancel messages from Stripe redirect
+    const success = searchParams.get("success");
+    const canceled = searchParams.get("canceled");
+
+    if (success) {
+      toast.success("Payment successful! Welcome to MonkLog Pro!");
+      router.replace("/chat"); // Remove query params and redirect
+    }
+
+    if (canceled) {
+      toast.error(
+        "Payment canceled. Please try again or contact support if you need help."
+      );
+      router.replace("/pricing"); // Remove query params
+    }
+  }, [searchParams, router]);
+
+  const handlePurchase = async (plan: (typeof plans)[0]) => {
+    if (!plan.priceId) {
+      toast.error("Invalid plan selected. Please try again.");
+      return;
+    }
+
     try {
+      setIsLoading(true);
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: priceId }),
+        body: JSON.stringify({ planId: plan.priceId }),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to start checkout process");
+      }
+
       const { url } = await response.json();
-      window.location.href = url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to start checkout process");
+      console.error("Checkout error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to start checkout process"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -153,10 +203,13 @@ export default function PricingPage() {
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePurchase(plan.name);
+                    handlePurchase(plan);
                   }}
+                  disabled={isLoading}
                 >
-                  {plan.name === selectedPlan ? (
+                  {isLoading ? (
+                    "Processing..."
+                  ) : plan.name === selectedPlan ? (
                     "GET STARTED"
                   ) : (
                     <span className="flex items-center justify-center gap-2">

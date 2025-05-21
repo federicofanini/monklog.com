@@ -14,13 +14,18 @@ import { cn } from "@/lib/utils";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
 import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function ChatPage() {
   const [mentor, setMentor] = useState<MentorType>("MONK");
   const [remainingMessages, setRemainingMessages] = useState<number | null>(
     null
   );
+  const [isPaid, setIsPaid] = useState(false);
   const { user } = useKindeAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       body: {
@@ -37,6 +42,20 @@ export default function ChatPage() {
         }
       },
     });
+
+  const checkUserStatus = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch("/api/chat/usage/status");
+      const data = await response.json();
+      setIsPaid(data.paid);
+      if (!data.paid) {
+        fetchRemainingMessages();
+      }
+    } catch (error) {
+      console.error("Failed to fetch user status:", error);
+    }
+  };
 
   const fetchRemainingMessages = async () => {
     if (!user?.id) return;
@@ -57,14 +76,27 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchRemainingMessages();
+      checkUserStatus();
     }
   }, [user?.id]);
+
+  // Handle successful payment
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success === "true") {
+      toast.success("Welcome to MonkLog Pro! You now have unlimited access.", {
+        duration: 5000,
+      });
+      checkUserStatus(); // Refresh user status
+      // Remove the success parameter from the URL
+      router.replace("/chat");
+    }
+  }, [searchParams, router]);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full pt-12">
-        {remainingMessages !== null && remainingMessages < 3 && (
+        {!isPaid && remainingMessages !== null && remainingMessages < 3 && (
           <div className="px-4 py-2 bg-red-500/10 text-red-400 text-sm font-mono mb-4 rounded-lg">
             {remainingMessages > 0
               ? `${remainingMessages} free messages remaining today`
@@ -73,6 +105,29 @@ export default function ChatPage() {
         )}
         <ScrollArea className="flex-1 px-3 sm:px-4 py-6">
           <div className="space-y-4 max-w-3xl mx-auto">
+            {/* Message count indicator */}
+            <div className="sticky top-0 z-10 flex justify-between items-center px-1 py-2 bg-black/80 backdrop-blur-sm border-b border-red-500/10 mb-4">
+              <div className="font-mono text-[10px] text-white/30">
+                {messages.length > 0
+                  ? `${messages.length} message${
+                      messages.length !== 1 ? "s" : ""
+                    }`
+                  : "No messages"}
+              </div>
+              {!isPaid && (
+                <div className="font-mono text-[10px] text-white/30">
+                  {remainingMessages !== null
+                    ? `${remainingMessages} / 3 free messages remaining`
+                    : "Loading..."}
+                </div>
+              )}
+              {isPaid && (
+                <div className="font-mono text-[10px] text-red-500/50">
+                  PRO ACCESS
+                </div>
+              )}
+            </div>
+
             {messages.length === 0 ? (
               <div className="space-y-6 px-1">
                 {/* Welcome Message */}
@@ -129,7 +184,7 @@ export default function ChatPage() {
             )}
 
             {/* Show upgrade prompt when limit is reached */}
-            {remainingMessages === 0 && (
+            {!isPaid && remainingMessages === 0 && (
               <div className="mt-8">
                 <UpgradePrompt />
               </div>
@@ -147,7 +202,7 @@ export default function ChatPage() {
                   placeholder="Share your truth..."
                   className="min-h-[44px] max-h-[200px] bg-black/40 resize-none border-red-500/20 focus:ring-1 focus:ring-red-500/40 placeholder:text-white/20 text-sm font-mono"
                   rows={1}
-                  disabled={isLoading || remainingMessages === 0}
+                  disabled={isLoading || (!isPaid && remainingMessages === 0)}
                 />
                 <div className="flex flex-col justify-end gap-2">
                   <MentorSelect value={mentor} onValueChange={setMentor} />
@@ -159,7 +214,7 @@ export default function ChatPage() {
                         ? "bg-red-500/50"
                         : "bg-red-500/80 hover:bg-red-500"
                     }`}
-                    disabled={isLoading || remainingMessages === 0}
+                    disabled={isLoading || (!isPaid && remainingMessages === 0)}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

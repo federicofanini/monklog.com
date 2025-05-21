@@ -43,6 +43,11 @@ export async function POST(req: Request) {
       stripeCustomerId = customer.id;
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      throw new Error("NEXT_PUBLIC_APP_URL is not set");
+    }
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
@@ -53,19 +58,29 @@ export async function POST(req: Request) {
         },
       ],
       mode: plan.interval === "one-time" ? "payment" : "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/chat?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      success_url: `${appUrl}/chat?success=true`,
+      cancel_url: `${appUrl}/pricing?canceled=true`,
       metadata: {
         userId: user.id,
         planName: plan.name,
       },
     });
 
+    if (!session.url) {
+      throw new Error("No checkout URL received from Stripe");
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Stripe checkout error:", error);
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create checkout session",
+        details: error instanceof Error ? error.toString() : undefined,
+      },
       { status: 500 }
     );
   }

@@ -1,11 +1,17 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is not set");
+// Check if we're on the client side
+const isClient = typeof window !== "undefined";
+
+// Only throw the error on the server side
+if (!isClient && !process.env.STRIPE_SECRET_KEY) {
+  throw new Error(
+    "STRIPE_SECRET_KEY is not set. Please add it to your .env file. You can find your secret key in the Stripe Dashboard: https://dashboard.stripe.com/apikeys"
+  );
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2025-04-30.basil",
   typescript: true,
 });
 
