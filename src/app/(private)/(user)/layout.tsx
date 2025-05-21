@@ -46,24 +46,21 @@ export default async function ChatLayout({
   const { getUser } = await getKindeServerSession();
   const kindeUser = await getUser();
 
-  if (!kindeUser || kindeUser.email !== "federico.monklog@gmail.com") {
-    redirect(paths.users.home);
-  }
-
+  // If no user is logged in, redirect to login
   if (!kindeUser || !kindeUser.email) {
     redirect(paths.api.login);
   }
 
   try {
-    // Check if user exists and has settings
-    const user = await prisma.user.findUnique({
+    // Check if user exists and create if not
+    let user = await prisma.user.findUnique({
       where: { id: kindeUser.id },
-      include: { settings: true },
+      select: { id: true, paid: true },
     });
 
-    // If user doesn't exist, create them and set up default data
+    // If user doesn't exist, create them
     if (!user) {
-      await prisma.user.create({
+      user = await prisma.user.create({
         data: {
           id: kindeUser.id,
           email: kindeUser.email,
@@ -74,15 +71,12 @@ export default async function ChatLayout({
           avatar_url: kindeUser.picture || undefined,
           role: "MONK",
         },
+        select: { id: true, paid: true },
       });
     }
-    // Get user's paid status and initialize chat usage if not paid
-    const dbUser = await prisma.user.findUnique({
-      where: { id: kindeUser.id },
-      select: { paid: true },
-    });
 
-    if (!dbUser?.paid) {
+    // Initialize chat usage for free users
+    if (user && !user.paid) {
       await initUserChatUsage(kindeUser.id);
     }
 
