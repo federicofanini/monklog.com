@@ -1,3 +1,4 @@
+import { freeMessages } from "@/packages/ai/free-messages";
 import Link from "next/link";
 
 export function CTASection() {
@@ -30,7 +31,8 @@ export function CTASection() {
             <p className="text-sm text-white/60 font-mono">Limited Access</p>
             <ul className="space-y-3 text-left mt-6">
               <li className="flex items-center gap-2 text-white/60 font-mono text-sm">
-                <span className="text-red-500">→</span>3 messages per day
+                <span className="text-red-500">→</span>
+                {freeMessages} messages per day
               </li>
               <li className="flex items-center gap-2 text-white/60 font-mono text-sm">
                 <span className="text-red-500">→</span>

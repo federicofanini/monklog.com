@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
 import { useSearchParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { freeMessages } from "@/packages/ai/free-messages";
 
 // Add these types at the top of the file after imports
 interface AIMessage {
@@ -178,13 +179,15 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full pt-12">
-        {!isPaid && remainingMessages !== null && remainingMessages < 3 && (
-          <div className="px-4 py-2 bg-red-500/10 text-red-400 text-sm font-mono mb-4 rounded-lg">
-            {remainingMessages > 0
-              ? `${remainingMessages} free messages remaining today`
-              : "Daily message limit reached. Upgrade to continue chatting."}
-          </div>
-        )}
+        {!isPaid &&
+          remainingMessages !== null &&
+          remainingMessages < freeMessages && (
+            <div className="px-4 py-2 bg-red-500/10 text-red-400 text-sm font-mono mb-4 rounded-lg">
+              {remainingMessages > 0
+                ? `${remainingMessages} / ${freeMessages} free messages remaining today`
+                : "Daily message limit reached. Upgrade to continue chatting."}
+            </div>
+          )}
         <ScrollArea className="flex-1 px-3 sm:px-4 py-6">
           <div className="space-y-4 max-w-3xl mx-auto">
             {/* Message count indicator */}
@@ -212,7 +215,7 @@ export default function ChatPage() {
               {!isPaid && (
                 <div className="font-mono text-[10px] text-white/30">
                   {remainingMessages !== null
-                    ? `${remainingMessages} / 3 free messages remaining`
+                    ? `${remainingMessages} / ${freeMessages} free messages remaining`
                     : "Loading..."}
                 </div>
               )}

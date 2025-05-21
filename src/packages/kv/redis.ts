@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { freeMessages } from "../ai/free-messages";
 
 if (!process.env.REDIS_URL) {
   throw new Error("REDIS_URL environment variable is not set");
@@ -59,6 +60,6 @@ export const kv = {
   async isUserAllowedToChat(userId: string, isPaid: boolean): Promise<boolean> {
     if (isPaid) return true;
     const usage = await this.getChatUsage(userId);
-    return usage < 3; // Free users get 3 messages per day
+    return usage < freeMessages;
   },
 };
