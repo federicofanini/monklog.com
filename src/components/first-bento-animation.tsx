@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Icons } from "@/components/icons";
 import {
   Reasoning,
   ReasoningContent,
@@ -9,6 +8,7 @@ import {
 } from "@/components/ui/reasoning";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { Logo } from "./sections/logo";
 
 export function ReasoningBasic() {
   const reasoningText = `Based on your calendar patterns and preferences, I recommend scheduling the team meeting for Tuesday at 2pm. This time slot has historically had the highest attendance rate, and it avoids conflicts with other recurring meetings.`;
@@ -84,7 +84,7 @@ export function FirstBentoAnimation() {
         </div>
         <div className="flex items-start gap-2">
           <div className="flex items-center bg-background rounded-full size-10 flex-shrink-0 justify-center shadow-[0_0_10px_rgba(0,0,0,0.05)] border border-border">
-            <Icons.logo className="size-4" />
+            <Logo className="size-4" />
           </div>
 
           <div className="relative">

@@ -7,29 +7,35 @@ export function QuoteSection() {
   return (
     <section
       id="quote"
-      className="flex flex-col items-center justify-center gap-8 w-full p-14 bg-accent z-20"
+      className="w-full bg-black border-y border-red-500/20 py-24"
     >
-      <blockquote className="max-w-3xl text-left px-4">
-        <p className="text-xl md:text-2xl text-primary leading-relaxed tracking-tighter font-medium mb-6">
-          {quoteSection.quote}
-        </p>
+      <div className="max-w-4xl mx-auto px-6">
+        <blockquote className="space-y-8">
+          <p className="text-2xl md:text-3xl font-mono text-white leading-relaxed tracking-tight">
+            &ldquo;{quoteSection.quote}&rdquo;
+          </p>
 
-        <div className="flex gap-4">
-          <div className="size-10 rounded-full bg-primary border border-border">
-            <img
-              src={quoteSection.author.image}
-              alt={quoteSection.author.name}
-              className="size-full rounded-full object-contain"
-            />
+          <div className="flex items-center gap-4">
+            <div className="size-12 border border-red-500/20 p-0.5">
+              <img
+                src={quoteSection.author.image}
+                alt={quoteSection.author.name}
+                className="size-full object-cover grayscale"
+              />
+            </div>
+            <div>
+              <cite className="not-italic">
+                <span className="block text-lg font-mono text-red-500">
+                  {quoteSection.author.name}
+                </span>
+                <span className="block text-sm font-mono text-white/40">
+                  {quoteSection.author.role}
+                </span>
+              </cite>
+            </div>
           </div>
-          <div className="text-left">
-            <cite className="text-lg font-medium text-primary not-italic">
-              {quoteSection.author.name}
-            </cite>
-            <p className="text-sm text-primary">{quoteSection.author.role}</p>
-          </div>
-        </div>
-      </blockquote>
+        </blockquote>
+      </div>
     </section>
   );
 }

@@ -20,51 +20,54 @@ interface OnboardingResult {
 const MENTOR_PERSONAS = [
   {
     id: MentorPersona.GHOST,
-    name: "The Ghost",
+    name: "THE GHOST",
     description:
-      "Silent, poetic killer. Short, sharp truths. No motivation, just clarity.",
-    style: "bg-gradient-to-br from-gray-900 to-gray-800",
+      "Silent assassin. Ruthless efficiency. No motivation needed, just pure execution.",
+    style: "bg-gradient-to-br from-zinc-900 to-zinc-800 border-zinc-700/50",
   },
   {
     id: MentorPersona.WARRIOR,
-    name: "The Marine",
+    name: "THE MARINE",
     description:
-      "Cold, hard drill sergeant focused on results and brutal honesty.",
-    style: "bg-gradient-to-br from-red-900 to-red-800",
+      "Drill sergeant from hell. Zero tolerance for weakness. Maximum intensity.",
+    style: "bg-gradient-to-br from-red-900 to-red-800 border-red-700/50",
   },
   {
     id: MentorPersona.MONK,
-    name: "The Monk",
+    name: "THE WARLORD",
     description:
-      "Stoic warrior combining ancient wisdom with modern discipline.",
-    style: "bg-gradient-to-br from-blue-900 to-blue-800",
+      "Strategic commander. Brutal wisdom. Forges mental steel through ancient discipline.",
+    style: "bg-gradient-to-br from-blue-900 to-blue-800 border-blue-700/50",
   },
   {
     id: MentorPersona.SHADOW,
-    name: "The CEO",
+    name: "THE SHADOW",
     description:
-      "Strategic operator focused on metrics, execution, and long-term results.",
-    style: "bg-gradient-to-br from-purple-900 to-purple-800",
+      "Special forces operator. Silent killer of mediocrity. Tactical precision in all things.",
+    style:
+      "bg-gradient-to-br from-purple-900 to-purple-800 border-purple-700/50",
   },
 ];
 
 const COMMITMENT_LEVELS = [
   {
     id: "warrior",
-    name: "Warrior Mode",
-    description: "5 habits, aggressive tone, daily challenges",
+    name: "WARRIOR MODE",
+    description:
+      "5 core habits. Daily missions. Maximum pressure. For the elite 1%.",
     habits: 5,
   },
   {
     id: "monk",
-    name: "Monk Mode",
-    description: "3 habits, balanced approach, weekly challenges",
+    name: "MONK MODE",
+    description:
+      "3 foundational habits. Weekly challenges. Intense but focused.",
     habits: 3,
   },
   {
     id: "ghost",
-    name: "Ghost Mode",
-    description: "1 habit, pure focus, monthly challenges",
+    name: "GHOST MODE",
+    description: "1 critical habit. Monthly targets. Pure, lethal focus.",
     habits: 1,
   },
 ] as const;
@@ -91,7 +94,7 @@ export function OnboardingFlow({ userId }: OnboardingFlowProps) {
         throw new Error(result.error || "Failed to complete onboarding");
       }
 
-      toast.success("Welcome to MonkLog", {
+      toast.success("Welcome to the crucible", {
         duration: 3000,
       });
 
@@ -115,79 +118,107 @@ export function OnboardingFlow({ userId }: OnboardingFlowProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-4xl mx-auto px-6 py-12 bg-black text-white">
       {/* Step 1: Choose Mentor */}
       {step === 1 && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold">Choose Your Mentor</h2>
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold tracking-tighter">
+              CHOOSE YOUR DRILL SERGEANT
+            </h2>
+            <p className="text-red-500 font-mono">
+              Select your master. Choose wisely. There is no easy path.
+            </p>
+          </div>
+
           <div className="grid gap-4">
             {MENTOR_PERSONAS.map((persona) => (
               <div
                 key={persona.id}
-                className={`p-4 rounded-lg cursor-pointer transition-all ${
+                className={`p-6 border cursor-pointer transition-all ${
                   persona.style
                 } ${
                   selectedMentor === persona.id
-                    ? "ring-2 ring-red-500"
-                    : "hover:ring-2 hover:ring-red-500/50"
+                    ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+                    : "border-transparent hover:border-red-500/50"
                 }`}
                 onClick={() => setSelectedMentor(persona.id)}
               >
-                <h3 className="font-bold">{persona.name}</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-xl font-bold font-mono mb-2">
+                  {persona.name}
+                </h3>
+                <p className="text-white/60 font-mono text-sm">
                   {persona.description}
                 </p>
               </div>
             ))}
           </div>
+
           <Button
-            className="w-full bg-red-500 hover:bg-red-600"
+            className="w-full bg-red-500 hover:bg-red-600 h-12 font-mono tracking-wider"
             disabled={!selectedMentor}
             onClick={() => setStep(2)}
           >
-            Continue
+            CONFIRM SELECTION
           </Button>
         </div>
       )}
 
       {/* Step 2: Choose Commitment Level */}
       {step === 2 && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold">Choose Your Commitment</h2>
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold tracking-tighter">
+              SET YOUR INTENSITY
+            </h2>
+            <p className="text-red-500 font-mono">
+              Choose your battle rhythm. Each path demands total commitment.
+            </p>
+          </div>
+
           <div className="grid gap-4">
             {COMMITMENT_LEVELS.map((level) => (
               <div
                 key={level.id}
-                className={`p-4 rounded-lg cursor-pointer transition-all bg-black/40 ${
+                className={`p-6 border cursor-pointer transition-all bg-black ${
                   selectedCommitment === level.id
-                    ? "ring-2 ring-red-500"
-                    : "hover:ring-2 hover:ring-red-500/50"
+                    ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+                    : "border-red-500/20 hover:border-red-500/50"
                 }`}
                 onClick={() => setSelectedCommitment(level.id)}
               >
-                <h3 className="font-bold">{level.name}</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-xl font-bold font-mono mb-2">
+                  {level.name}
+                </h3>
+                <p className="text-white/60 font-mono text-sm">
                   {level.description}
                 </p>
               </div>
             ))}
           </div>
-          <div className="flex gap-4">
+
+          <div className="grid grid-cols-2 gap-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="h-12 font-mono tracking-wider border-red-500/20 text-white hover:bg-red-500/10"
               onClick={() => setStep(1)}
             >
-              Back
+              BACK
             </Button>
             <Button
-              className="flex-1 bg-red-500 hover:bg-red-600"
+              className="h-12 font-mono tracking-wider bg-red-500 hover:bg-red-600"
               disabled={!selectedCommitment || loading}
               onClick={handleComplete}
             >
-              {loading ? "Setting Up..." : "Begin Training"}
+              {loading ? "INITIALIZING..." : "BEGIN TRAINING"}
             </Button>
           </div>
+
+          <p className="text-center text-white/40 font-mono text-sm">
+            There is no turning back after this point.
+            <br />
+            Your transformation begins now.
+          </p>
         </div>
       )}
     </div>

@@ -20,11 +20,11 @@ export const metadata: Metadata = {
   ],
   authors: [
     {
-      name: "Dillion Verma",
-      url: "https://magicui.design",
+      name: "Federico Fanini",
+      url: "https://federicofan.com",
     },
   ],
-  creator: "dillionverma",
+  creator: "federicofan",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    creator: "@dillionverma",
+    creator: "@FedericoFan",
   },
   robots: {
     index: true,

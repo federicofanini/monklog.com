@@ -4,45 +4,60 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { SectionHeader } from "@/components/section-header";
-import { siteConfig } from "@/lib/config";
 
 export function FAQSection() {
-  const { faqSection } = siteConfig;
+  const faqs = [
+    {
+      question: "WHO IS THIS FOR?",
+      answer:
+        "This is for the 0.1% who are sick of their own excuses. For those who crave genuine self-mastery, not quick fixes. For warriors ready to kill their undisciplined self.",
+    },
+    {
+      question: "WHO SHOULD STAY AWAY?",
+      answer:
+        "If you want gentle affirmations, can't handle brutal honesty, or believe in 'magic pills' for success - this isn't your fight. Stay comfortable. Stay average.",
+    },
+    {
+      question: "WHAT MAKES THIS DIFFERENT?",
+      answer:
+        "MonkLog isn't another feel-good app. It's a weapon against mediocrity. Military-grade AI mentorship, raw truth tracking, and unfiltered feedback. No fluff. No excuses.",
+    },
+    {
+      question: "HOW DOES IT WORK?",
+      answer:
+        "Every morning: Receive your mission. During the day: Execute and track. Every night: Face the truth. Your AI Mentor analyzes your performance and adjusts your training. Repeat until weakness is a memory.",
+    },
+    {
+      question: "CAN I GET A REFUND?",
+      answer:
+        "No. This is a commitment to your transformation, not a trial run. If you're looking for an easy out before you start, you're not ready for this level of change.",
+    },
+  ];
 
   return (
-    <section
-      id="faq"
-      className="flex flex-col items-center justify-center gap-10 pb-10 w-full relative"
-    >
-      <SectionHeader>
-        <h2 className="text-3xl md:text-4xl font-medium tracking-tighter text-center text-balance">
-          {faqSection.title}
-        </h2>
-        <p className="text-muted-foreground text-center text-balance font-medium">
-          {faqSection.description}
-        </p>
-      </SectionHeader>
+    <section id="faq" className="w-full bg-black py-24">
+      <div className="max-w-3xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
+            BEFORE YOU ENLIST
+          </h2>
+          <p className="text-lg text-white/60 font-mono">
+            The uncomfortable truth about what you&apos;re signing up for.
+          </p>
+        </div>
 
-      <div className="max-w-3xl w-full mx-auto px-10">
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full border-b-0 grid gap-2"
-        >
-          {faqSection.faQitems.map((faq, index) => (
+        <Accordion type="single" collapsible className="space-y-4">
+          {faqs.map((faq, index) => (
             <AccordionItem
               key={index}
-              value={index.toString()}
-              className="border-0 grid gap-2"
+              value={`item-${index}`}
+              className="border border-red-500/20 bg-black/40"
             >
-              <AccordionTrigger className="border bg-accent border-border rounded-lg px-4 py-3.5 cursor-pointer no-underline hover:no-underline data-[state=open]:ring data-[state=open]:ring-primary/20">
+              <AccordionTrigger className="px-6 py-4 text-white font-mono hover:text-red-500">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="p-3 border text-primary rounded-lg bg-accent">
-                <p className="text-primary font-medium leading-relaxed">
-                  {faq.answer}
-                </p>
+              <AccordionContent className="px-6 pb-4">
+                <p className="text-white/60 font-mono">{faq.answer}</p>
               </AccordionContent>
             </AccordionItem>
           ))}

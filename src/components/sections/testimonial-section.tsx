@@ -1,4 +1,3 @@
-import { SectionHeader } from "@/components/section-header";
 import { SocialProofTestimonials } from "@/components/testimonial-scroll";
 import { siteConfig } from "@/lib/config";
 
@@ -8,18 +7,26 @@ export function TestimonialSection() {
   return (
     <section
       id="testimonials"
-      className="flex flex-col items-center justify-center w-full"
+      className="flex flex-col items-center justify-center w-full bg-black py-24"
     >
-      <SectionHeader>
-        <h2 className="text-3xl md:text-4xl font-medium tracking-tighter text-center text-balance">
-          Empower Your Workflow with AI
+      <div className="text-center space-y-2 max-w-2xl mx-auto px-6 mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white">
+          WARRIORS WHO CONQUERED
         </h2>
-        <p className="text-muted-foreground text-center text-balance font-medium">
-          Ask your AI Agent for real-time collaboration, seamless integrations,
-          and actionable insights to streamline your operations.
+        <p className="text-red-500 font-mono">
+          These are not success stories. These are war stories.
         </p>
-      </SectionHeader>
+      </div>
+
       <SocialProofTestimonials testimonials={testimonials} />
+
+      <div className="mt-12 text-center max-w-lg mx-auto px-6">
+        <p className="text-white/40 font-mono text-sm">
+          Every victory here was earned through sweat and discipline.
+          <br />
+          No shortcuts. No excuses.
+        </p>
+      </div>
     </section>
   );
 }

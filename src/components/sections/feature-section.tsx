@@ -1,30 +1,62 @@
-import { SectionHeader } from "@/components/section-header";
-import { Feature as FeatureComponent } from "@/components/ui/feature-slideshow";
-import { siteConfig } from "@/lib/config";
-
 export function FeatureSection() {
-  const { title, description, items } = siteConfig.featureSection;
-
   return (
-    <section
-      id="features"
-      className="flex flex-col items-center justify-center gap-5 w-full relative"
-    >
-      <SectionHeader>
-        <h2 className="text-3xl md:text-4xl font-medium tracking-tighter text-center text-balance">
-          {title}
-        </h2>
-        <p className="text-muted-foreground text-center text-balance font-medium">
-          {description}
-        </p>
-      </SectionHeader>
-      <div className="w-full h-full lg:h-[450px] flex items-center justify-center">
-        <FeatureComponent
-          collapseDelay={5000}
-          linePosition="bottom"
-          featureItems={items}
-          lineColor="bg-secondary"
-        />
+    <section id="features" className="w-full bg-black py-24">
+      <div className="max-w-4xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
+            YOUR ARSENAL OF DISCIPLINE
+          </h2>
+          <p className="text-lg text-white/60 font-mono">
+            Military-grade tools to forge your unbreakable self.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* AI Monk Mentor */}
+          <div className="border border-red-500/20 p-8 bg-black/40 space-y-4">
+            <div className="text-2xl">🤖</div>
+            <h3 className="text-xl font-bold text-white">AI MONK MENTOR</h3>
+            <p className="text-white/60 font-mono text-sm">
+              Choose your master. The ruthless &quot;Ghost&quot;? The strategic
+              &quot;Warlord&quot;? Each AI persona is designed to chisel away
+              your weaknesses.
+            </p>
+          </div>
+
+          {/* Daily Missions */}
+          <div className="border border-red-500/20 p-8 bg-black/40 space-y-4">
+            <div className="text-2xl">⚔️</div>
+            <h3 className="text-xl font-bold text-white">DAILY MISSIONS</h3>
+            <p className="text-white/60 font-mono text-sm">
+              No more guessing. Your AI Mentor assigns precise objectives. Your
+              job is to conquer them.
+            </p>
+          </div>
+
+          {/* Habit Command Center */}
+          <div className="border border-red-500/20 p-8 bg-black/40 space-y-4">
+            <div className="text-2xl">📊</div>
+            <h3 className="text-xl font-bold text-white">
+              HABIT COMMAND CENTER
+            </h3>
+            <p className="text-white/60 font-mono text-sm">
+              Minimalist tracking of your core disciplines. Visual progress.
+              Zero fluff.
+            </p>
+          </div>
+
+          {/* Truth Log */}
+          <div className="border border-red-500/20 p-8 bg-black/40 space-y-4">
+            <div className="text-2xl">🩸</div>
+            <h3 className="text-xl font-bold text-white">
+              TRUTH LOG & RELAPSE REPORT
+            </h3>
+            <p className="text-white/60 font-mono text-sm">
+              Confess your shortcomings. Face them. Learn from them. Your mentor
+              will ensure it.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );

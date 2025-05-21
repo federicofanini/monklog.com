@@ -18,7 +18,7 @@ export const Highlight = ({
     <span
       className={cn(
         "p-1 py-0.5 font-medium dark:font-semibold text-secondary",
-        className,
+        className
       )}
     >
       {children}
@@ -29,22 +29,26 @@ export const Highlight = ({
 export const BLUR_FADE_DELAY = 0.15;
 
 export const siteConfig = {
-  name: "Cal AI",
-  description: "Smart scheduling powered by AI.",
-  cta: "Get Started",
+  name: "MonkLog",
+  description: "Discipline tracker and AI mentor for founders in monk mode.",
+  cta: "Start Your Monk Mode",
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   keywords: [
-    "AI Calendar",
-    "Smart Scheduling",
-    "Productivity",
-    "Time Management",
+    "Monk Mode",
+    "Habit Tracker",
+    "Discipline App",
+    "AI Mentor",
+    "Focus Tracker",
+    "Founder Productivity",
+    "Daily Streaks",
+    "Self-Mastery",
   ],
   links: {
-    email: "support@calai.app",
-    twitter: "https://twitter.com/calaiapp",
-    discord: "https://discord.gg/calaiapp",
-    github: "https://github.com/calaiapp",
-    instagram: "https://instagram.com/calaiapp",
+    email: "federico.monklog@gmail.com",
+    twitter: "https://twitter.com/FedericoFan",
+    discord: "https://discord.gg/",
+    github: "https://github.com/federicofanini/monklog.com",
+    instagram: "#",
   },
   nav: {
     links: [
@@ -1018,30 +1022,11 @@ export const siteConfig = {
   },
   footerLinks: [
     {
-      title: "Company",
+      title: "boring",
       links: [
-        { id: 1, title: "About", url: "#" },
-        { id: 2, title: "Contact", url: "#" },
-        { id: 3, title: "Blog", url: "#" },
-        { id: 4, title: "Story", url: "#" },
-      ],
-    },
-    {
-      title: "Products",
-      links: [
-        { id: 5, title: "Company", url: "#" },
-        { id: 6, title: "Product", url: "#" },
-        { id: 7, title: "Press", url: "#" },
-        { id: 8, title: "More", url: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { id: 9, title: "Press", url: "#" },
-        { id: 10, title: "Careers", url: "#" },
-        { id: 11, title: "Newsletters", url: "#" },
-        { id: 12, title: "More", url: "#" },
+        { id: 1, title: "privacy", url: "/privacy" },
+        { id: 2, title: "terms", url: "/tos" },
+        { id: 3, title: "cookies", url: "/cookies" },
       ],
     },
   ],
