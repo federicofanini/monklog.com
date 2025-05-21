@@ -38,7 +38,7 @@ export default function RootLayout({
     <AuthProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-background`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-black`}
         >
           <ThemeProvider
             attribute="class"
