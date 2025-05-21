@@ -1,7 +1,7 @@
 "use client";
 
-import { useChat } from "ai/react";
-import { useState, useEffect, useCallback } from "react";
+import { useChat, Message } from "ai/react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   MentorSelect,
   MentorType,
@@ -9,45 +9,53 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, CornerDownLeft, Trash2 } from "lucide-react";
+import { Loader2, CornerDownLeft, Trash2, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
 import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
-import { useSearchParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { freeMessages } from "@/packages/ai/free-messages";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
-// Add these types at the top of the file after imports
-interface AIMessage {
-  id: string;
-  role: "assistant" | "user";
-  content: string;
-  createdAt: Date;
+// Define a base message type that includes offline flag
+interface BaseMessage extends Omit<Message, "createdAt"> {
+  createdAt: string; // Change to string to avoid hydration issues
+  offline?: boolean;
 }
 
 export default function ChatPage() {
-  // Initialize mentor from cookie or default to MONK
-  const [mentor, setMentor] = useState<MentorType>(() => {
-    // Get from cookie on initial render only
-    const saved = Cookies.get("preferred_mentor");
-    return (saved as MentorType) || "MONK";
-  });
-
+  // PWA and network status hooks
+  const { isOnline } = useNetworkStatus();
+  const { canInstall, install } = usePWAInstall();
+  const [isInstallPromptShown, setIsInstallPromptShown] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [remainingMessages, setRemainingMessages] = useState<number | null>(
     null
   );
-  const [isPaid, setIsPaid] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const { user } = useKindeAuth();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+
+  // Refs for scroll and textarea
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isInitialMount = useRef(true);
+
+  // Get saved mentor from cookie
+  const savedMentor = Cookies.get("preferred_mentor") as MentorType | undefined;
+  const [mentor, setMentor] = useState<MentorType>(savedMentor || "MONK");
+
+  // Store offline messages
+  const [offlineMessages, setOfflineMessages] = useState<BaseMessage[]>(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem("offline_messages");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
+    handleSubmit: aiHandleSubmit,
     isLoading,
     setMessages,
   } = useChat({
@@ -64,120 +72,160 @@ export default function ChatPage() {
         toast.error("Failed to send message. Please try again.");
       }
     },
+    onFinish: (message) => {
+      // Remove any corresponding offline message if it exists
+      setOfflineMessages((prev) =>
+        prev.filter((msg) => msg.id !== `offline-${message.id}`)
+      );
+    },
   });
 
-  const fetchRemainingMessages = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const response = await fetch(`/api/chat/usage?userId=${user.id}`);
-      const data = await response.json();
-      setRemainingMessages(freeMessages - data.usage);
-
-      // Show warning toast when user has 1 message remaining
-      if (freeMessages - data.usage === 1) {
-        toast.warning("You have 1 message remaining today.");
-      }
-    } catch (error) {
-      console.error("Failed to fetch remaining messages:", error);
-      toast.error("Failed to fetch message limit status.");
+  // Save offline messages to localStorage
+  useEffect(() => {
+    if (offlineMessages.length > 0) {
+      localStorage.setItem("offline_messages", JSON.stringify(offlineMessages));
+    } else {
+      localStorage.removeItem("offline_messages");
     }
-  }, [user?.id]);
+  }, [offlineMessages]);
 
-  const checkUserStatus = useCallback(async () => {
-    if (!user?.id) return;
+  // Handle mentor change
+  useEffect(() => {
+    Cookies.set("preferred_mentor", mentor, { expires: 365 });
+  }, [mentor]);
+
+  // Show PWA install prompt
+  useEffect(() => {
+    if (canInstall && !isInstallPromptShown) {
+      setIsInstallPromptShown(true);
+      toast.message("Install MonkLog", {
+        description: "Install our app for the best experience",
+        action: {
+          label: "Install",
+          onClick: () => install(),
+        },
+        duration: 10000,
+      });
+    }
+  }, [canInstall, install, isInstallPromptShown]);
+
+  const fetchRemainingMessages = useCallback(async () => {
+    if (!isOnline) return;
     try {
       const response = await fetch("/api/chat/usage/status");
       const data = await response.json();
       setIsPaid(data.paid);
       if (!data.paid) {
-        fetchRemainingMessages();
+        const usageResponse = await fetch("/api/chat/usage");
+        const usageData = await usageResponse.json();
+        setRemainingMessages(freeMessages - usageData.usage);
       }
     } catch (error) {
-      console.error("Failed to fetch user status:", error);
+      console.error("Failed to fetch message limit status:", error);
     }
-  }, [user?.id, fetchRemainingMessages]);
+  }, [isOnline]);
 
-  const fetchChatHistory = useCallback(async () => {
-    if (!user?.id) return;
+  // Initial data loading
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      fetchRemainingMessages();
+    }
+  }, [fetchRemainingMessages]);
+
+  // Handle offline message submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!isOnline) {
+      const offlineMessage: BaseMessage = {
+        id: `offline-${Date.now()}`,
+        role: "user",
+        content: input,
+        createdAt: new Date().toISOString(),
+        offline: true,
+      };
+
+      setOfflineMessages((prev) => [...prev, offlineMessage]);
+      // Cast the message to Message type for useChat compatibility
+      setMessages((prev) => [
+        ...prev,
+        { ...offlineMessage, createdAt: new Date(offlineMessage.createdAt) },
+      ]);
+
+      toast.warning(
+        "Message saved offline. Will sync when connection is restored."
+      );
+      return;
+    }
+
+    aiHandleSubmit(e);
+  };
+
+  const syncOfflineMessages = useCallback(async () => {
+    if (!isOnline || !offlineMessages.length) return;
+
+    setIsSyncing(true);
     try {
-      setIsLoadingHistory(true);
-      const response = await fetch("/api/chat/history");
-      const data = await response.json();
-
-      if (data.messages) {
-        const historyMessages = data.messages.map((msg: AIMessage) => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          createdAt: new Date(msg.createdAt),
-        }));
-
-        // Sort by creation date
-        historyMessages.sort(
-          (a: AIMessage, b: AIMessage) =>
-            a.createdAt.getTime() - b.createdAt.getTime()
-        );
-
-        setMessages(historyMessages);
+      for (const msg of offlineMessages) {
+        await aiHandleSubmit(new Event("submit"), {
+          data: {
+            mentor,
+            message: msg.content,
+          },
+        });
       }
+
+      setOfflineMessages([]);
+      toast.success("Offline messages synced successfully");
     } catch (error) {
-      console.error("Failed to fetch chat history:", error);
-      toast.error("Failed to load chat history");
+      console.error("Failed to sync offline messages:", error);
+      toast.error("Failed to sync some offline messages");
     } finally {
-      setIsLoadingHistory(false);
+      setIsSyncing(false);
     }
-  }, [user?.id, setMessages]);
+  }, [isOnline, offlineMessages, mentor, aiHandleSubmit]);
+
+  // Sync offline messages when coming back online
+  useEffect(() => {
+    if (isOnline && offlineMessages.length > 0 && !isSyncing) {
+      syncOfflineMessages();
+    }
+  }, [isOnline, offlineMessages.length, syncOfflineMessages, isSyncing]);
 
   const clearChat = useCallback(async () => {
     try {
-      // Clear messages from UI
       setMessages([]);
-
-      // Clear messages from database
-      const response = await fetch("/api/chat/history/clear", {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to clear chat history");
-      }
-
+      setOfflineMessages([]);
+      localStorage.removeItem("offline_messages");
       toast.success("Chat cleared");
     } catch (error) {
       console.error("Failed to clear chat:", error);
-      toast.error("Failed to clear chat history");
-      // Refetch messages to ensure UI is in sync with database
-      fetchChatHistory();
+      toast.error("Failed to clear chat");
     }
-  }, [setMessages, fetchChatHistory]);
+  }, [setMessages]);
 
-  // Update cookie when mentor changes
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
-    Cookies.set("preferred_mentor", mentor, { expires: 365 });
-  }, [mentor]);
-
-  useEffect(() => {
-    if (user?.id) {
-      checkUserStatus();
-      fetchChatHistory();
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [user?.id, checkUserStatus, fetchChatHistory]);
-
-  // Handle successful payment
-  useEffect(() => {
-    const success = searchParams.get("success");
-    if (success === "true") {
-      toast.success("Welcome to MonkLog Pro! You now have unlimited access.", {
-        duration: 5000,
-      });
-      checkUserStatus(); // Refresh user status
-      // Remove the success parameter from the URL
-      router.replace("/chat");
-    }
-  }, [searchParams, router, checkUserStatus]);
+  }, [messages]);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
+      {!isOnline && (
+        <div className="px-4 py-2 bg-yellow-500/10 text-yellow-400 text-sm font-mono flex items-center gap-2 justify-center">
+          <WifiOff className="h-4 w-4" />
+          Offline Mode
+        </div>
+      )}
+      {isSyncing && (
+        <div className="px-4 py-2 bg-blue-500/10 text-blue-400 text-sm font-mono flex items-center gap-2 justify-center">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Syncing offline messages...
+        </div>
+      )}
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full pt-12">
         {!isPaid &&
           remainingMessages !== null &&
@@ -188,13 +236,13 @@ export default function ChatPage() {
                 : "Daily message limit reached. Upgrade to continue chatting."}
             </div>
           )}
-        <ScrollArea className="flex-1 px-3 sm:px-4 py-6">
+        <ScrollArea ref={scrollRef} className="flex-1 px-3 sm:px-4 py-6">
           <div className="space-y-4 max-w-3xl mx-auto">
             {/* Message count indicator */}
             <div className="sticky top-0 z-10 flex justify-between items-center px-1 py-2 bg-black/80 backdrop-blur-sm border-b border-red-500/10 mb-4">
               <div className="flex items-center gap-4">
                 <div className="font-mono text-[10px] text-white/30">
-                  {isLoadingHistory
+                  {isLoading
                     ? "Loading history..."
                     : messages.length > 0
                     ? `${messages.length} message${
@@ -226,7 +274,7 @@ export default function ChatPage() {
               )}
             </div>
 
-            {messages.length === 0 && !isLoadingHistory ? (
+            {messages.length === 0 && !isLoading ? (
               <div className="space-y-6 px-1">
                 {/* Welcome Message */}
                 <div className="space-y-1">
@@ -251,34 +299,39 @@ export default function ChatPage() {
                 </div>
               </div>
             ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+              messages.map((message) => {
+                const msg = message as unknown as BaseMessage;
+                return (
                   <div
-                    className={`max-w-[90%] sm:max-w-[85%] space-y-1.5 ${
-                      message.role === "user" ? "text-right" : "text-left"
+                    key={message.id}
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <div className="font-mono text-[10px] text-white/40 uppercase tracking-wider px-1">
-                      {message.role === "user" ? "YOU" : mentor}
-                    </div>
                     <div
-                      className={cn(
-                        "rounded-lg p-3 font-mono text-sm leading-relaxed whitespace-pre-wrap",
-                        message.role === "user"
-                          ? "bg-red-500/10 text-white/90"
-                          : "bg-black/60 text-white/80"
-                      )}
+                      className={`max-w-[90%] sm:max-w-[85%] space-y-1.5 ${
+                        message.role === "user" ? "text-right" : "text-left"
+                      }`}
                     >
-                      {message.content}
+                      <div className="font-mono text-[10px] text-white/40 uppercase tracking-wider px-1 flex items-center gap-2 justify-end">
+                        {message.role === "user" ? "YOU" : mentor}
+                        {msg.offline && <WifiOff className="h-3 w-3" />}
+                      </div>
+                      <div
+                        className={cn(
+                          "rounded-lg p-3 font-mono text-sm leading-relaxed whitespace-pre-wrap",
+                          message.role === "user"
+                            ? "bg-red-500/10 text-white/90"
+                            : "bg-black/60 text-white/80",
+                          msg.offline && "opacity-50"
+                        )}
+                      >
+                        {message.content}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
 
             {/* Show upgrade prompt when limit is reached */}
@@ -287,19 +340,22 @@ export default function ChatPage() {
                 <UpgradePrompt />
               </div>
             )}
+
+            {/* Add extra spacing at the bottom */}
+            <div className="h-20" />
           </div>
         </ScrollArea>
 
         <div className="flex-none border-t border-red-500/20 bg-black/80 backdrop-blur-md">
-          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3">
+          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6">
             <form onSubmit={handleSubmit} className="relative">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Textarea
+                    ref={textareaRef}
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={(e) => {
-                      // Send on Enter (without shift) or Cmd/Ctrl + Enter
                       if (
                         (e.key === "Enter" && !e.shiftKey) ||
                         (e.key === "Enter" && (e.metaKey || e.ctrlKey))
@@ -310,7 +366,11 @@ export default function ChatPage() {
                         );
                       }
                     }}
-                    placeholder="Share your truth..."
+                    placeholder={
+                      isOnline
+                        ? "Share your truth..."
+                        : "Offline mode - Messages will sync when online"
+                    }
                     className="min-h-[44px] max-h-[200px] bg-black/40 resize-none border-red-500/20 focus:ring-1 focus:ring-red-500/40 placeholder:text-white/20 text-sm font-mono pr-12"
                     rows={1}
                     disabled={isLoading || (!isPaid && remainingMessages === 0)}
