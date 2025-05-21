@@ -25,6 +25,11 @@ enum MentorPersona {
   SHADOW
 }
 
+enum MessageRole {
+  user
+  assistant
+}
+
 model User {
   id         String  @id @default(uuid())
   email      String  @unique
@@ -140,7 +145,8 @@ model HabitLog {
 
   user            User           @relation(fields: [userId], references: [id])
   entries         HabitEntry[]
-  mentor_response MentorMessage?
+  mentor_response MentorMessage? @relation(fields: [mentorMessageId], references: [id])
+  mentorMessageId String?
 
   @@unique([userId, date])
   @@index([userId, date])
@@ -230,18 +236,15 @@ model DailyStats {
 }
 
 model MentorMessage {
-  id         String        @id @default(uuid())
-  userId     String
-  habitLogId String?       @unique // Optional: linked to a specific log
-  persona    MentorPersona
-  message    String
-  reflection String?
-  challenge  String?
+  id          String        @id @default(uuid())
+  userId      String
+  message     String // The actual message content
+  role        MessageRole // "user" or "assistant"
+  mentor_type MentorPersona // The mentor type used for this message
+  created_at  DateTime      @default(now())
 
-  created_at DateTime @default(now())
-
-  user     User      @relation(fields: [userId], references: [id])
-  habitLog HabitLog? @relation(fields: [habitLogId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  HabitLog HabitLog[]
 
   @@index([userId])
 }

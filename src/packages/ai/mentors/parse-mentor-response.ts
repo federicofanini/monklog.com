@@ -9,7 +9,7 @@ const sectionTitles: Record<MentorType, [string, string]> = {
   GHOST: ["TRUTH", "CHALLENGE"],
   MONK: ["INSIGHT", "PATH"],
   WARRIOR: ["ASSESSMENT", "ORDERS"],
-  CEO: ["ANALYSIS", "OBJECTIVE"],
+  CEO: ["ANALYSIS", "OBJECTIVE"], // Maps to SHADOW in the schema
 };
 
 export function parseMentorResponse(

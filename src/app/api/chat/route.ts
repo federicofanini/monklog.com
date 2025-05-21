@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText, Message } from "ai";
+import { streamText } from "ai";
 import { NextResponse } from "next/server";
 import { ghostPrompt } from "@/packages/ai/mentors/ghost";
 import { monkPrompt } from "@/packages/ai/mentors/monk";
@@ -9,6 +9,12 @@ import type { MentorType } from "@/components/private/chat/mentor-select";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { kv } from "@/packages/kv/redis";
 import { prisma } from "@/packages/database/prisma";
+import { MentorPersona, MessageRole } from "@prisma/client";
+
+interface AIMessage {
+  role: string;
+  content: string;
+}
 
 const mentorPrompts: Record<MentorType, string> = {
   GHOST: ghostPrompt,
@@ -28,6 +34,14 @@ const formatPrompts: Record<MentorType, string> = {
 };
 
 export const maxDuration = 10; // Allow streaming responses up to 30 seconds
+
+// Map frontend mentor types to schema enum
+const mentorTypeToPersona: Record<MentorType, MentorPersona> = {
+  GHOST: MentorPersona.GHOST,
+  MONK: MentorPersona.MONK,
+  WARRIOR: MentorPersona.WARRIOR,
+  CEO: MentorPersona.SHADOW,
+};
 
 export async function POST(req: Request) {
   try {
@@ -73,17 +87,71 @@ export async function POST(req: Request) {
       await kv.incrementChatUsage(user.id);
     }
 
-    const result = await streamText({
+    // First ensure the user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!userExists) {
+      // Create the user if they don't exist
+      await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email || "",
+          full_name: user.given_name || "Anonymous",
+        },
+      });
+    }
+
+    // Store the user's message
+    const userMessage = messages[messages.length - 1];
+    if (userMessage && userMessage.role === "user") {
+      await prisma.mentorMessage.create({
+        data: {
+          userId: user.id,
+          message: userMessage.content,
+          role: MessageRole.user,
+          mentor_type: mentorTypeToPersona[mentor as MentorType],
+        },
+      });
+    }
+
+    // Get AI response
+    const result = streamText({
       model: openai("gpt-4o-mini"),
       messages: [
         { role: "system", content: systemPrompt },
-        ...messages.map((msg: Message) => ({
+        ...messages.map((msg: AIMessage) => ({
           role: msg.role,
           content: msg.content,
         })),
       ],
       temperature: 0.7,
       maxTokens: 500,
+      onFinish: async (completion) => {
+        try {
+          // Get the final response from the completion
+          const lastStep = completion.steps[completion.steps.length - 1];
+          const response = lastStep?.text;
+
+          if (typeof response !== "string") {
+            console.error("Invalid response format from AI");
+            return;
+          }
+
+          // Store the AI response
+          await prisma.mentorMessage.create({
+            data: {
+              userId: user.id,
+              message: response,
+              role: MessageRole.assistant,
+              mentor_type: mentorTypeToPersona[mentor as MentorType],
+            },
+          });
+        } catch (error) {
+          console.error("Failed to save chat message:", error);
+        }
+      },
     });
 
     return result.toDataStreamResponse();

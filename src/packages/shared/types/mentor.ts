@@ -1,4 +1,4 @@
-export type MentorPersona = "GHOST" | "WARRIOR" | "MONK" | "SHADOW";
+export type MentorPersona = "GHOST" | "WARRIOR" | "MONK" | "CEO";
 
 export interface MentorResponse {
   truth: string;

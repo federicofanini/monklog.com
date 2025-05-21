@@ -16,32 +16,47 @@ import { toast } from "sonner";
 import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
 import { useSearchParams, useRouter } from "next/navigation";
 
+// Add these types at the top of the file after imports
+interface AIMessage {
+  id: string;
+  role: "assistant" | "user";
+  content: string;
+  createdAt: Date;
+}
+
 export default function ChatPage() {
   const [mentor, setMentor] = useState<MentorType>("MONK");
   const [remainingMessages, setRemainingMessages] = useState<number | null>(
     null
   );
   const [isPaid, setIsPaid] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const { user } = useKindeAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      body: {
-        mentor,
-      },
-      onError: (error) => {
-        if (error.message.includes("Daily message limit reached")) {
-          toast.error(
-            "Daily message limit reached. Upgrade to continue chatting."
-          );
-          fetchRemainingMessages();
-        } else {
-          toast.error("Failed to send message. Please try again.");
-        }
-      },
-    });
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    setMessages,
+  } = useChat({
+    body: {
+      mentor,
+    },
+    onError: (error) => {
+      if (error.message.includes("Daily message limit reached")) {
+        toast.error(
+          "Daily message limit reached. Upgrade to continue chatting."
+        );
+        fetchRemainingMessages();
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    },
+  });
 
   const checkUserStatus = async () => {
     if (!user?.id) return;
@@ -74,9 +89,42 @@ export default function ChatPage() {
     }
   };
 
+  // Fetch chat history
+  const fetchChatHistory = async () => {
+    if (!user?.id) return;
+    try {
+      setIsLoadingHistory(true);
+      const response = await fetch("/api/chat/history");
+      const data = await response.json();
+
+      if (data.messages) {
+        const historyMessages = data.messages.map((msg: AIMessage) => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          createdAt: new Date(msg.createdAt),
+        }));
+
+        // Sort by creation date
+        historyMessages.sort(
+          (a: AIMessage, b: AIMessage) =>
+            a.createdAt.getTime() - b.createdAt.getTime()
+        );
+
+        setMessages(historyMessages);
+      }
+    } catch (error) {
+      console.error("Failed to fetch chat history:", error);
+      toast.error("Failed to load chat history");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       checkUserStatus();
+      fetchChatHistory();
     }
   }, [user?.id]);
 
@@ -108,7 +156,9 @@ export default function ChatPage() {
             {/* Message count indicator */}
             <div className="sticky top-0 z-10 flex justify-between items-center px-1 py-2 bg-black/80 backdrop-blur-sm border-b border-red-500/10 mb-4">
               <div className="font-mono text-[10px] text-white/30">
-                {messages.length > 0
+                {isLoadingHistory
+                  ? "Loading history..."
+                  : messages.length > 0
                   ? `${messages.length} message${
                       messages.length !== 1 ? "s" : ""
                     }`
@@ -128,7 +178,7 @@ export default function ChatPage() {
               )}
             </div>
 
-            {messages.length === 0 ? (
+            {messages.length === 0 && !isLoadingHistory ? (
               <div className="space-y-6 px-1">
                 {/* Welcome Message */}
                 <div className="space-y-1">
@@ -170,7 +220,7 @@ export default function ChatPage() {
                     </div>
                     <div
                       className={cn(
-                        "rounded-lg p-3 font-mono text-sm leading-relaxed",
+                        "rounded-lg p-3 font-mono text-sm leading-relaxed whitespace-pre-wrap",
                         message.role === "user"
                           ? "bg-red-500/10 text-white/90"
                           : "bg-black/60 text-white/80"

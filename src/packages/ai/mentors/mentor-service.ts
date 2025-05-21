@@ -6,7 +6,6 @@ import type {
   MentorInput,
   MentorResponse,
   MentorError,
-  MentorPromptTemplate,
 } from "@/packages/shared/types/mentor";
 import {
   streamingCompletion,
@@ -15,16 +14,25 @@ import {
 } from "../ai";
 import { kv } from "@/packages/kv/redis";
 import { prisma } from "@/packages/database/prisma";
+import { MentorPersona } from "@prisma/client";
 
 const CACHE_PREFIX = "mentor:";
 const DEFAULT_CACHE_TIMEOUT = 3600; // 1 hour
 const MAX_RESPONSES_PER_DAY = 10;
 
-const mentorPrompts: MentorPromptTemplate = {
+// Map frontend mentor types to schema enum
+const mentorTypeToPersona: Record<string, MentorPersona> = {
+  GHOST: MentorPersona.GHOST,
+  MONK: MentorPersona.MONK,
+  WARRIOR: MentorPersona.WARRIOR,
+  CEO: MentorPersona.SHADOW,
+};
+
+const mentorPrompts: Record<string, string> = {
   GHOST: ghostPrompt,
   MONK: monkPrompt,
   WARRIOR: marinePrompt,
-  SHADOW: ceoPrompt,
+  CEO: ceoPrompt,
 };
 
 export class MentorService {
@@ -135,10 +143,9 @@ export class MentorService {
       await prisma.mentorMessage.create({
         data: {
           userId: input.userId,
-          habitLogId: input.habitLogId,
-          persona: input.persona,
           message: fullMessage,
-          challenge: challenge || undefined,
+          role: "assistant",
+          mentor_type: mentorTypeToPersona[input.persona],
         },
       });
 
