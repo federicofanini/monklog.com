@@ -3,13 +3,13 @@
 import { siteConfig } from "@/lib/config";
 import { paths } from "@/lib/path";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+// import { Menu, X } from "lucide-react";
 // import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export function Navbar() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
+  // const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   // const handleOverlayClick = () => setIsDrawerOpen(false);
 
   return (
@@ -73,7 +73,7 @@ export function Navbar() {
             >
               ENLIST NOW
             </Link>
-            <button
+            {/* <button
               className="md:hidden border border-red-500/20 size-10 flex items-center justify-center"
               onClick={toggleDrawer}
             >
@@ -82,7 +82,7 @@ export function Navbar() {
               ) : (
                 <Menu className="size-5 text-white" />
               )}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
