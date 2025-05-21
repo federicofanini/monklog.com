@@ -30,21 +30,6 @@ export function HeroSection() {
           >
             FORGE YOUR FUTURE, NOW.
           </Link>
-
-          <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
-            <div className="border border-red-500/20 p-4 bg-black/40">
-              <div className="text-2xl mb-2">⚔️</div>
-              <div className="text-sm font-mono text-white/60">TRUTH</div>
-            </div>
-            <div className="border border-red-500/20 p-4 bg-black/40">
-              <div className="text-2xl mb-2">🔥</div>
-              <div className="text-sm font-mono text-white/60">TRACKING</div>
-            </div>
-            <div className="border border-red-500/20 p-4 bg-black/40">
-              <div className="text-2xl mb-2">🧠</div>
-              <div className="text-sm font-mono text-white/60">TRANSFORM</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
