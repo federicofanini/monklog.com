@@ -5,244 +5,201 @@ import { prisma } from "@/packages/database/prisma";
 import type Stripe from "stripe";
 import { PlanName } from "@prisma/client";
 
-async function handleSubscriptionChange(
-  subscriptionId: string,
+// Utility function to handle database updates
+async function updateUserAndPlan(
+  userId: string,
   customerId: string,
-  status: boolean
+  priceId: string,
+  subscriptionId: string | null,
+  isPaid: boolean
 ) {
+  console.log("[DB Update] Starting database update for user:", {
+    userId,
+    customerId,
+    priceId,
+    subscriptionId,
+    isPaid,
+  });
+
   try {
-    console.log(
-      `[Subscription ${
-        status ? "Update" : "Cancel"
-      }] Processing subscription ${subscriptionId} for customer ${customerId}`
-    );
+    // Use a transaction to ensure both updates succeed or fail together
+    const [user, plan] = await prisma.$transaction([
+      // Update user's paid status
+      prisma.user.update({
+        where: { id: userId },
+        data: { paid: isPaid },
+      }),
+      // Upsert plan record
+      prisma.plan.upsert({
+        where: { stripe_customer_id: customerId },
+        create: {
+          userId,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId || "one-time",
+          stripe_price_id: priceId,
+          plan_name: PlanName.PRO,
+          subscription_status: isPaid,
+        },
+        update: {
+          stripe_subscription_id: subscriptionId || "one-time",
+          stripe_price_id: priceId,
+          subscription_status: isPaid,
+        },
+      }),
+    ]);
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    console.log("[Subscription] Retrieved subscription details:", {
-      id: subscription.id,
-      status: subscription.status,
-      priceId: subscription.items.data[0].price.id,
-    });
-
-    const customer = await stripe.customers.retrieve(customerId);
-    const userId = (customer as Stripe.Customer).metadata.userId;
-    console.log("[Subscription] Retrieved customer details:", {
-      customerId,
-      userId,
-      email: (customer as Stripe.Customer).email,
-    });
-
-    if (!userId) {
-      throw new Error("No userId found in customer metadata");
-    }
-
-    // Update or create plan record
-    const plan = await prisma.plan.upsert({
-      where: {
-        stripe_subscription_id: subscriptionId,
-      },
-      create: {
-        userId,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        stripe_price_id: subscription.items.data[0].price.id,
-        plan_name: PlanName.PRO,
-        subscription_status: status,
-      },
-      update: {
-        subscription_status: status,
-        stripe_price_id: subscription.items.data[0].price.id,
-      },
-    });
-    console.log("[Subscription] Updated plan record:", {
-      planId: plan.id,
-      userId: plan.userId,
-      status: plan.subscription_status,
+    console.log("[DB Update] Successfully updated database:", {
+      user: { id: user.id, paid: user.paid },
+      plan: { id: plan.id, status: plan.subscription_status },
     });
 
-    // Update user's paid status
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { paid: status },
-    });
-    console.log("[Subscription] Updated user paid status:", {
-      userId: user.id,
-      paid: user.paid,
-      email: user.email,
-    });
+    return { user, plan };
   } catch (error) {
-    console.error(
-      "[Subscription Error] Failed to handle subscription change:",
-      {
-        error,
-        subscriptionId,
-        customerId,
-        status,
-      }
-    );
-    throw error;
-  }
-}
-
-async function handleOneTimePayment(session: Stripe.Checkout.Session) {
-  try {
-    console.log("[One-Time Payment] Processing payment for session:", {
-      sessionId: session.id,
-      mode: session.mode,
-      customerId: session.customer,
-    });
-
-    const { userId } = session.metadata || {};
-    const customerId = session.customer as string;
-
-    if (!userId || !customerId) {
-      throw new Error("Missing userId or customerId in session metadata");
-    }
-
-    console.log("[One-Time Payment] Session metadata:", {
-      userId,
-      customerId,
-      priceId: session.line_items?.data[0]?.price?.id,
-    });
-
-    // Create lifetime plan record
-    const plan = await prisma.plan.upsert({
-      where: {
-        stripe_customer_id: customerId,
-      },
-      create: {
-        userId,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: session.id,
-        stripe_price_id: session.line_items?.data[0]?.price?.id || "",
-        plan_name: PlanName.PRO,
-        subscription_status: true,
-      },
-      update: {
-        subscription_status: true,
-        stripe_price_id: session.line_items?.data[0]?.price?.id || "",
-      },
-    });
-    console.log("[One-Time Payment] Created/Updated plan record:", {
-      planId: plan.id,
-      userId: plan.userId,
-      customerId: plan.stripe_customer_id,
-    });
-
-    // Update user's paid status
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { paid: true },
-    });
-    console.log("[One-Time Payment] Updated user paid status:", {
-      userId: user.id,
-      paid: user.paid,
-      email: user.email,
-    });
-  } catch (error) {
-    console.error("[One-Time Payment Error] Failed to handle payment:", {
-      error,
-      sessionId: session.id,
-      customerId: session.customer,
-    });
+    console.error("[DB Update] Failed to update database:", error);
     throw error;
   }
 }
 
 export async function POST(req: Request) {
-  console.log("[Webhook] Received Stripe webhook event");
-
-  const body = await req.text();
-  const signature = (await headers()).get("Stripe-Signature");
-
-  if (!signature) {
-    console.error("[Webhook Error] No Stripe signature found in request");
-    return NextResponse.json({ error: "No signature found" }, { status: 400 });
-  }
-
-  let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-    console.log("[Webhook] Verified Stripe signature, processing event:", {
-      type: event.type,
-      id: event.id,
-    });
-  } catch (error) {
-    console.error("[Webhook Error] Signature verification failed:", {
-      error,
-      signature: signature.substring(0, 20) + "...",
-    });
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-  }
+    const body = await req.text();
+    const signature = (await headers()).get("Stripe-Signature");
 
-  try {
+    if (!signature) {
+      console.error("[Webhook] Missing Stripe signature");
+      return NextResponse.json(
+        { error: "No signature found" },
+        { status: 400 }
+      );
+    }
+
+    // Verify webhook signature
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+      console.log("[Webhook] Received verified event:", event.type);
+    } catch (err) {
+      console.error("[Webhook] Signature verification failed:", err);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    }
+
+    // Handle the event
     switch (event.type) {
       case "checkout.session.completed": {
-        console.log("[Webhook] Processing checkout.session.completed");
         const session = event.data.object as Stripe.Checkout.Session;
-
-        // Expand the session to get line items
-        const expandedSession = await stripe.checkout.sessions.retrieve(
-          session.id,
-          {
-            expand: ["line_items"],
-          }
-        );
-        console.log("[Webhook] Retrieved expanded session:", {
-          sessionId: expandedSession.id,
-          customerId: expandedSession.customer,
-          amount: expandedSession.amount_total,
-          mode: expandedSession.mode,
+        console.log("[Webhook] Processing checkout.session.completed:", {
+          sessionId: session.id,
+          customerId: session.customer,
+          mode: session.mode,
         });
 
-        // Handle one-time payment
+        // Get the customer ID and metadata
+        const customerId = session.customer as string;
+        const userId = session.metadata?.userId;
+
+        if (!userId) {
+          throw new Error("No userId found in session metadata");
+        }
+
+        // For subscriptions, wait for subscription events
+        if (session.mode === "subscription") {
+          console.log(
+            "[Webhook] Subscription checkout completed, waiting for subscription events"
+          );
+          return NextResponse.json({ received: true });
+        }
+
+        // For one-time payments, process immediately
         if (session.mode === "payment") {
-          await handleOneTimePayment(expandedSession);
+          // Retrieve the session with line items
+          const expandedSession = await stripe.checkout.sessions.retrieve(
+            session.id,
+            { expand: ["line_items"] }
+          );
+
+          const priceId = expandedSession.line_items?.data[0]?.price?.id;
+          if (!priceId) {
+            throw new Error("No price ID found in session");
+          }
+
+          await updateUserAndPlan(
+            userId,
+            customerId,
+            priceId,
+            null, // No subscription ID for one-time payments
+            true
+          );
         }
         break;
       }
 
       case "customer.subscription.created":
       case "customer.subscription.updated": {
-        console.log(`[Webhook] Processing ${event.type}`);
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionChange(
-          subscription.id,
+        console.log(`[Webhook] Processing ${event.type}:`, {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+          status: subscription.status,
+        });
+
+        // Get customer to retrieve userId
+        const customer = await stripe.customers.retrieve(
+          subscription.customer as string
+        );
+        const userId = (customer as Stripe.Customer).metadata.userId;
+
+        if (!userId) {
+          throw new Error("No userId found in customer metadata");
+        }
+
+        await updateUserAndPlan(
+          userId,
           subscription.customer as string,
-          true
+          subscription.items.data[0].price.id,
+          subscription.id,
+          subscription.status === "active"
         );
         break;
       }
 
       case "customer.subscription.deleted": {
-        console.log("[Webhook] Processing subscription deletion");
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionChange(
-          subscription.id,
+        console.log("[Webhook] Processing subscription deletion:", {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+        });
+
+        const customer = await stripe.customers.retrieve(
+          subscription.customer as string
+        );
+        const userId = (customer as Stripe.Customer).metadata.userId;
+
+        if (!userId) {
+          throw new Error("No userId found in customer metadata");
+        }
+
+        await updateUserAndPlan(
+          userId,
           subscription.customer as string,
+          subscription.items.data[0].price.id,
+          subscription.id,
           false
         );
         break;
       }
 
       default: {
-        console.log("[Webhook] Ignoring unhandled event type:", event.type);
+        console.log(`[Webhook] Unhandled event type: ${event.type}`);
       }
     }
 
-    console.log("[Webhook] Successfully processed event:", event.type);
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[Webhook Error] Failed to handle webhook:", {
-      error,
-      eventType: event.type,
-      eventId: event.id,
-    });
+    console.error("[Webhook] Error processing webhook:", error);
     return NextResponse.json(
       {
         error:
