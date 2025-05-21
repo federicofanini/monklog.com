@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "MonkLog",
-    short_name: "ML",
+    short_name: "MonkLog",
     description: "Ready to push your limits?",
     start_url: "/chat",
     display: "standalone",
