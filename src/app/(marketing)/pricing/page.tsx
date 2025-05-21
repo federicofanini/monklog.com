@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { STRIPE_PLANS } from "@/packages/stripe/config";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { Suspense } from "react";
 
 const features = [
   "Unlimited daily messages",
@@ -47,7 +48,8 @@ const plans: PricingPlan[] = [
   },
 ];
 
-export default function PricingPage() {
+// Separate the pricing content into its own client component
+function PricingContent() {
   const [selectedPlan, setSelectedPlan] = useState<string>("Yearly");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -236,6 +238,27 @@ export default function PricingPage() {
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<PricingFallback />}>
+      <PricingContent />
+    </Suspense>
+  );
+}
+
+// Fallback component while loading
+function PricingFallback() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-black to-neutral-950">
+      <div className="animate-pulse space-y-4 text-center">
+        <div className="h-8 w-64 bg-white/10 rounded"></div>
+        <div className="h-4 w-96 bg-white/10 rounded"></div>
+      </div>
     </div>
   );
 }
