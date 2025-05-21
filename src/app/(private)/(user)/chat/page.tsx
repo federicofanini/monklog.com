@@ -71,10 +71,10 @@ export default function ChatPage() {
     try {
       const response = await fetch(`/api/chat/usage?userId=${user.id}`);
       const data = await response.json();
-      setRemainingMessages(3 - data.usage);
+      setRemainingMessages(freeMessages - data.usage);
 
       // Show warning toast when user has 1 message remaining
-      if (3 - data.usage === 1) {
+      if (freeMessages - data.usage === 1) {
         toast.warning("You have 1 message remaining today.");
       }
     } catch (error) {
