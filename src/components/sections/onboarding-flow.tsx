@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MentorPersona } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { paths } from "@/lib/path";
-import { completeOnboarding } from "@/app/(chat)/onboarding/actions";
+import { completeOnboarding } from "@/app/(private)/(user)/onboarding/actions";
 import { toast } from "sonner";
 
 interface OnboardingFlowProps {

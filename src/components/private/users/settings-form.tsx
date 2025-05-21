@@ -8,8 +8,8 @@ import {
   updateSettings,
   //resetProgress,
   deleteAccount,
-} from "@/app/(chat)/chat/settings/actions";
-import type { UpdateSettingsInput } from "@/app/(chat)/chat/settings/actions";
+} from "@/app/(private)/(user)/chat/settings/actions";
+import type { UpdateSettingsInput } from "@/app/(private)/(user)/chat/settings/actions";
 import { useRouter } from "next/navigation";
 import { paths } from "@/lib/path";
 

@@ -98,7 +98,7 @@ export default async function HistoryPage() {
     }
 
     return (
-      <div className="container max-w-2xl py-8 space-y-8 mx-auto">
+      <div className="container max-w-2xl py-18 space-y-8 mx-auto">
         {/* Stats Overview */}
         <Card className="p-6 bg-black/40">
           <div className="grid gap-6 sm:grid-cols-3">
