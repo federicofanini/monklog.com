@@ -5,18 +5,14 @@ export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
   keywords: [
-    "SkyAgent",
-    "AI",
-    "Agent",
-    "Magic UI",
-    "Freelancer",
-    "UI/UX",
-    "Developer",
-    "React Template",
-    "Next.js Template",
-    "Tailwind",
-    "Shadcn",
-    "Tailwind V4",
+    "Monk Mode",
+    "Habit Tracker",
+    "Discipline App",
+    "AI Mentor",
+    "Focus Tracker",
+    "Founder Productivity",
+    "Daily Streaks",
+    "Self-Mastery",
   ],
   authors: [
     {
@@ -32,6 +28,11 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
+    images: [
+      {
+        url: "@opengraph-image.png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
