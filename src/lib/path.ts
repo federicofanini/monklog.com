@@ -27,4 +27,7 @@ export const paths = {
     login: "/api/auth/login",
     register: "/api/auth/register",
   },
+  links: {
+    github: "https://github.com/federicofanini/monklog.com",
+  },
 };
