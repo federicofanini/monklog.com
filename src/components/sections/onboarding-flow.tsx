@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MentorPersona } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { paths } from "@/lib/path";
-import { completeOnboarding } from "@/app/(private)/(admin)/(users)/onboarding/actions";
+import { completeOnboarding } from "@/app/(chat)/onboarding/actions";
 import { toast } from "sonner";
 
 interface OnboardingFlowProps {
@@ -91,13 +91,13 @@ export function OnboardingFlow({ userId }: OnboardingFlowProps) {
         throw new Error(result.error || "Failed to complete onboarding");
       }
 
-      toast.success("Welcome to Monk Mode", {
+      toast.success("Welcome to MonkLog", {
         duration: 3000,
       });
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      router.push(paths.monk.habits);
+      router.push(paths.users.home);
       router.refresh();
     } catch (error) {
       console.error("Error completing onboarding:", error);

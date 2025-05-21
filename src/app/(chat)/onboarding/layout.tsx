@@ -29,7 +29,7 @@ export default async function OnboardingLayout({
       if (existingUser) {
         // If user exists and has settings, redirect to habits
         if (existingUser.settings) {
-          redirect(paths.monk.habits);
+          redirect(paths.users.home);
         }
         return existingUser;
       }

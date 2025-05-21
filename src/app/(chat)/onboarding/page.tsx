@@ -15,17 +15,15 @@ export default async function OnboardingPage() {
 
   // Check if user has already completed onboarding
   const profile = await getUserProfile(user.id);
-  if (profile.settings) {
-    redirect(paths.monk.habits);
+  if (profile?.settings) {
+    redirect(paths.users.home);
   }
 
   return (
     <div className="min-h-screen bg-black text-white py-8">
       <div className="container max-w-2xl mx-auto space-y-8">
         <Card className="p-8 bg-black/40 space-y-6">
-          <h1 className="text-2xl font-bold text-center">
-            Welcome to Monk Mode
-          </h1>
+          <h1 className="text-2xl font-bold text-center">Welcome to MonkLog</h1>
           <p className="text-center text-muted-foreground">
             Let&apos;s set up your training environment. This will take about 2
             minutes.

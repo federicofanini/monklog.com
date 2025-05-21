@@ -45,7 +45,7 @@ export async function updateUserHabits(habitIds: string[]) {
       });
     }
 
-    revalidatePath(paths.monk.log);
+    revalidatePath(paths.users.home);
     return { success: true };
   } catch (error) {
     console.error("Error updating user habits:", error);
@@ -152,7 +152,7 @@ export async function saveGeneratedHabits(habits: GeneratedHabit[]) {
     // Update user's habits
     await updateUserHabits(createdHabits.map((h) => h.id));
 
-    revalidatePath(paths.monk.habits);
+    revalidatePath(paths.users.home);
     return { success: true, habits: createdHabits };
   } catch (error) {
     console.error("Error saving generated habits:", error);
@@ -218,7 +218,7 @@ export async function deleteHabits() {
       });
     }
 
-    revalidatePath(paths.monk.habits);
+    revalidatePath(paths.users.home);
     return { success: true };
   } catch (error) {
     console.error("Error deleting habits:", error);

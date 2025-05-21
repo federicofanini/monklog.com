@@ -14,6 +14,7 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { paths } from "@/lib/path";
 
 export function ChatUserMenu() {
   const { user, isLoading } = useKindeBrowserClient();
@@ -68,21 +69,21 @@ export function ChatUserMenu() {
         <DropdownMenuSeparator className="bg-red-500/20" />
 
         <DropdownMenuGroup>
-          <Link prefetch href="/blackboard/settings">
+          <Link prefetch href={paths.users.account}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Account
             </DropdownMenuItem>
           </Link>
 
-          <Link prefetch href="/blackboard/settings">
+          <Link prefetch href={paths.users.settings}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
-              Support
+              Settings
             </DropdownMenuItem>
           </Link>
 
-          <Link prefetch href="/blackboard/tokens">
+          <Link prefetch href={paths.users.billing}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
-              Credits
+              Billing
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>

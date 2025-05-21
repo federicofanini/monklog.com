@@ -274,7 +274,7 @@ export async function completeOnboarding(
     );
 
     // Only revalidate path if transaction was successful
-    revalidatePath(paths.monk.habits);
+    revalidatePath(paths.users.home);
     return result;
   } catch (error) {
     console.error("Error completing onboarding:", error);

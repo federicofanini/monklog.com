@@ -71,7 +71,7 @@ export async function updateSettings(
       },
     });
 
-    revalidatePath(paths.monk.settings);
+    revalidatePath(paths.users.settings);
     return { success: true };
   } catch (error) {
     console.error("Error updating settings:", error);
@@ -126,7 +126,7 @@ export async function resetProgress(userId: string) {
       });
     });
 
-    revalidatePath(paths.monk.habits);
+    revalidatePath(paths.users.settings);
     return { success: true };
   } catch (error) {
     console.error("Error resetting progress:", error);

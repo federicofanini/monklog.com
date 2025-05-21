@@ -48,7 +48,7 @@ export default async function HistoryPage() {
                 habits, build streaks, and watch your transformation unfold.
               </p>
               <div className="pt-4">
-                <Link href={paths.monk.log}>
+                <Link href={paths.users.home}>
                   <Button className="bg-red-500 hover:bg-red-600">
                     Log Your First Day
                   </Button>
@@ -250,9 +250,9 @@ export default async function HistoryPage() {
                         <div className="text-muted-foreground">
                           {log.mentor_response.message}
                         </div>
-                        {log.mentor_response.challenge && (
+                        {log.mentor_response.message && (
                           <div className="text-red-500">
-                            ⚔️ {log.mentor_response.challenge}
+                            ⚔️ {log.mentor_response.message}
                           </div>
                         )}
                       </blockquote>
