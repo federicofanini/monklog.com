@@ -1,8 +1,6 @@
-import { ChatHeader } from "@/components/private/chat/chat-header";
 import { paths } from "@/lib/path";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-import { Toaster } from "@/components/ui/sonner";
 import { prisma } from "@/packages/database/prisma";
 import { kv } from "@/packages/kv/redis";
 
@@ -49,11 +47,5 @@ export default async function ChatLayout({
     await initUserChatUsage(user.id);
   }
 
-  return (
-    <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-black to-neutral-950">
-      <ChatHeader />
-      {children}
-      <Toaster />
-    </div>
-  );
+  return <>{children}</>;
 }

@@ -69,6 +69,34 @@ export function ChatUserMenu() {
         <DropdownMenuSeparator className="bg-red-500/20" />
 
         <DropdownMenuGroup>
+          <Link prefetch href={paths.users.chat}>
+            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
+              Chat
+            </DropdownMenuItem>
+          </Link>
+
+          <Link prefetch href={paths.users.habits}>
+            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
+              Habits
+            </DropdownMenuItem>
+          </Link>
+
+          <Link prefetch href={paths.users.history}>
+            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
+              History
+            </DropdownMenuItem>
+          </Link>
+
+          <Link prefetch href={paths.users.profile}>
+            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
+              Profile
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator className="bg-red-500/20" />
+
+        <DropdownMenuGroup>
           <Link prefetch href={paths.users.account}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Account
@@ -78,6 +106,12 @@ export function ChatUserMenu() {
           <Link prefetch href={paths.users.settings}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Settings
+            </DropdownMenuItem>
+          </Link>
+
+          <Link prefetch href={paths.users.pricing}>
+            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
+              Pricing
             </DropdownMenuItem>
           </Link>
 

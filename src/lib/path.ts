@@ -9,6 +9,11 @@ export const paths = {
   },
   users: {
     home: "/chat",
+    chat: "/chat",
+    habits: "/chat/habits",
+    history: "/chat/history",
+    pricing: "/chat/pricing",
+    profile: "/chat/profile",
     settings: "/chat/settings",
     account: "/chat/account",
     billing: "/chat/billing",

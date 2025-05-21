@@ -5,53 +5,7 @@ import { paths } from "@/lib/path";
 import { prisma } from "@/packages/database/prisma";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { HabitGeneratorService } from "@/packages/ai/habit-generator";
-import { GeneratedHabit } from "@/packages/ai/habit-generator/habit-service";
-
-export async function updateUserHabits(habitIds: string[]) {
-  const { getUser } = await getKindeServerSession();
-  const user = await getUser();
-
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Check if today's log exists
-    const existingLog = await prisma.habitLog.findUnique({
-      where: {
-        userId_date: {
-          userId: user?.id || "",
-          date: today,
-        },
-      },
-    });
-
-    // Only update entries if a log already exists
-    if (existingLog) {
-      // Delete existing entries
-      await prisma.habitEntry.deleteMany({
-        where: {
-          habitLogId: existingLog.id,
-        },
-      });
-
-      // Create new entries
-      await prisma.habitEntry.createMany({
-        data: habitIds.map((habitId) => ({
-          habitLogId: existingLog.id,
-          habitId,
-          completed: false,
-          relapsed: false,
-        })),
-      });
-    }
-
-    revalidatePath(paths.users.home);
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating user habits:", error);
-    return { success: false, error: "Failed to update habits" };
-  }
-}
+import type { GeneratedHabit } from "@/packages/shared/types/habits";
 
 export interface GenerateHabitsInput {
   goals: string[];
@@ -64,7 +18,7 @@ export async function generateHabits(input: GenerateHabitsInput) {
   const user = await getUser();
 
   if (!user?.id) {
-    return { success: false, error: "User not authenticated" };
+    return { success: false, error: "User not authenticated" } as const;
   }
 
   try {
@@ -76,11 +30,12 @@ export async function generateHabits(input: GenerateHabitsInput) {
 
     return {
       success: true,
-      ...result,
-    };
+      habits: result.habits,
+      explanation: result.explanation,
+    } as const;
   } catch (error) {
     console.error("Error generating habits:", error);
-    return { success: false, error: "Failed to generate habits" };
+    return { success: false, error: "Failed to generate habits" } as const;
   }
 }
 
@@ -113,7 +68,6 @@ async function ensureCategories(): Promise<Record<string, string>> {
     }),
   ]);
 
-  // Create a map of category name to ID
   return categories.reduce((acc, cat) => {
     acc[cat.name] = cat.id;
     return acc;
@@ -149,11 +103,26 @@ export async function saveGeneratedHabits(habits: GeneratedHabit[]) {
       )
     );
 
-    // Update user's habits
-    await updateUserHabits(createdHabits.map((h) => h.id));
+    // Create today's log and entries
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    revalidatePath(paths.users.home);
-    return { success: true, habits: createdHabits };
+    const log = await prisma.habitLog.create({
+      data: {
+        userId: user.id,
+        date: today,
+        entries: {
+          create: createdHabits.map((habit) => ({
+            habitId: habit.id,
+            completed: false,
+            relapsed: false,
+          })),
+        },
+      },
+    });
+
+    revalidatePath(paths.users.habits);
+    return { success: true, habits: createdHabits, log };
   } catch (error) {
     console.error("Error saving generated habits:", error);
     return { success: false, error: "Failed to save habits" };
@@ -173,52 +142,12 @@ export async function deleteHabits() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get the user's current habit log
-    const currentLog = await prisma.habitLog.findUnique({
-      where: {
-        userId_date: {
-          userId: user.id,
-          date: today,
-        },
-      },
-      include: {
-        entries: {
-          include: {
-            habit: true,
-          },
-        },
-      },
+    // Delete all user's habit logs and entries
+    await prisma.habitLog.deleteMany({
+      where: { userId: user.id },
     });
 
-    if (currentLog) {
-      // Get all habit IDs from the current log
-      const habitIds = currentLog.entries.map((entry) => entry.habit.id);
-
-      // Delete the habit entries
-      await prisma.habitEntry.deleteMany({
-        where: {
-          habitLogId: currentLog.id,
-        },
-      });
-
-      // Delete the habits themselves
-      await prisma.habit.deleteMany({
-        where: {
-          id: {
-            in: habitIds,
-          },
-        },
-      });
-
-      // Delete the log
-      await prisma.habitLog.delete({
-        where: {
-          id: currentLog.id,
-        },
-      });
-    }
-
-    revalidatePath(paths.users.home);
+    revalidatePath(paths.users.habits);
     return { success: true };
   } catch (error) {
     console.error("Error deleting habits:", error);
