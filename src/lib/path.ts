@@ -16,7 +16,7 @@ export const paths = {
     profile: "/profile",
     settings: "/chat/settings",
     account: "/chat/account",
-    billing: "/chat/billing",
+    billing: "https://billing.stripe.com/p/login/6oUeVc5ki0Pkeg24etgA800",
   },
   admin: {
     home: "/admin",

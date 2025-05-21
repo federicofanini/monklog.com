@@ -115,7 +115,7 @@ export function ChatUserMenu() {
             </DropdownMenuItem>
           </Link>
 
-          <Link prefetch href={paths.users.billing}>
+          <Link prefetch href={paths.users.billing} target="_blank">
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Billing
             </DropdownMenuItem>
