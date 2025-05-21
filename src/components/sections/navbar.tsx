@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { paths } from "@/lib/path";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+// import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -35,7 +35,7 @@ export function Navbar() {
   }, []);
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
-  const handleOverlayClick = () => setIsDrawerOpen(false);
+  // const handleOverlayClick = () => setIsDrawerOpen(false);
 
   return (
     <header
@@ -87,7 +87,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu 
       <AnimatePresence>
         {isDrawerOpen && (
           <>
@@ -126,7 +126,7 @@ export function Navbar() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>*/}
     </header>
   );
 }
