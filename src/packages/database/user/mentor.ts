@@ -36,38 +36,6 @@ export async function getMentorMessages(userId: string, limit = 5) {
   }
 }
 
-export async function createMentorResponse(
-  userId: string,
-  habitLogId: string | null | undefined,
-  message: string,
-  reflection?: string,
-  challenge?: string
-) {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { current_mentor_persona: true },
-      cacheStrategy: { ttl: HOUR },
-    });
-
-    if (!user) throw new Error("User not found");
-
-    return await prisma.mentorMessage.create({
-      data: {
-        userId,
-        habitLogId: habitLogId || undefined,
-        persona: user.current_mentor_persona,
-        message,
-        reflection,
-        challenge,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating mentor response:", error);
-    throw error;
-  }
-}
-
 export async function getCurrentMentorPersona(
   userId: string
 ): Promise<MentorPersona> {

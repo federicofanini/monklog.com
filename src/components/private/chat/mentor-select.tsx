@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Select,
   SelectContent,
@@ -5,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 export type MentorType = "GHOST" | "MONK" | "WARRIOR" | "CEO";
 
@@ -48,15 +51,32 @@ interface MentorSelectProps {
 }
 
 export function MentorSelect({ value, onValueChange }: MentorSelectProps) {
+  // Use client-side state to prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
   const currentMentor = mentors.find((m) => m.id === value);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger className="w-[100px] h-8 bg-black/40 border-red-500/20 focus:ring-1 focus:ring-red-500/40 font-mono text-[10px]">
+          <SelectValue>
+            <span className="text-red-500/80">Loading...</span>
+          </SelectValue>
+        </SelectTrigger>
+      </Select>
+    );
+  }
 
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className="w-[100px] h-8 bg-black/40 border-red-500/20 focus:ring-1 focus:ring-red-500/40 font-mono text-[10px]">
         <SelectValue>
-          <span className="text-red-500/80">
-            {currentMentor?.name || value}
-          </span>
+          <span className="text-red-500/80">{currentMentor?.name}</span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent

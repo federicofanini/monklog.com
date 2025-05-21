@@ -26,11 +26,11 @@ const mentorPrompts: Record<MentorType, string> = {
 // Enhanced system prompts to ensure consistent formatting
 const formatPrompts: Record<MentorType, string> = {
   GHOST:
-    "Respond in this exact format:\n[TRUTH]\nYour sharp, direct message\n\n[CHALLENGE]\nOne clear challenge",
-  MONK: "Respond in this exact format:\n[INSIGHT]\nYour philosophical insight\n\n[PATH]\nThe way forward",
+    "You can respond naturally, but maintain your cold, sharp tone. When giving challenges, mark them with [CHALLENGE]. Keep responses brief and intense.",
+  MONK: "You can respond conversationally while maintaining your stoic wisdom. Use [INSIGHT] for key philosophical points when relevant. If suggesting a path forward, mark it with [PATH].",
   WARRIOR:
-    "Respond in this exact format:\n[ASSESSMENT]\nYour direct evaluation\n\n[ORDERS]\nSpecific instructions",
-  CEO: "Respond in this exact format:\n[ANALYSIS]\nYour strategic assessment\n\n[OBJECTIVE]\nNext measurable goal",
+    "Respond naturally but maintain your commanding presence. When giving direct orders or action items, mark them with [ORDERS]. Keep it intense and focused.",
+  CEO: "Stay strategic but conversational. When providing key analysis, mark it with [ANALYSIS]. For specific goals or metrics, use [OBJECTIVE]. Focus on execution.",
 };
 
 export const maxDuration = 10; // Allow streaming responses up to 30 seconds
@@ -53,6 +53,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { messages, mentor = "MONK" } = await req.json();
+
+    // Get the appropriate mentor prompt and combine with format
+    const systemPrompt = `${mentorPrompts[mentor as MentorType]}\n\n${
+      formatPrompts[mentor as MentorType]
+    }`;
+
+    if (!systemPrompt) {
+      return NextResponse.json(
+        { error: "Invalid mentor type" },
+        { status: 400 }
+      );
+    }
+
     // Get user's paid status from database
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
@@ -66,19 +80,6 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Daily message limit reached. Upgrade to continue chatting." },
         { status: 429 }
-      );
-    }
-
-    const { messages, mentor = "MONK" } = await req.json();
-
-    // Get the appropriate mentor prompt
-    const systemPrompt = `${mentorPrompts[mentor as MentorType]}\n\n${
-      formatPrompts[mentor as MentorType]
-    }`;
-    if (!systemPrompt) {
-      return NextResponse.json(
-        { error: "Invalid mentor type" },
-        { status: 400 }
       );
     }
 
@@ -154,7 +155,23 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toDataStreamResponse();
+    const streamResponse = result.toDataStreamResponse();
+
+    // Create a new response with the stream
+    const response = new NextResponse(streamResponse.body, {
+      headers: streamResponse.headers,
+      status: 200,
+    });
+
+    // Set cookie in response
+    response.cookies.set("preferred_mentor", mentor, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+
+    return response;
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(

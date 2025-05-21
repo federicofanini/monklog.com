@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MentorSelect,
   MentorType,
@@ -15,6 +15,7 @@ import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
 import { UpgradePrompt } from "@/components/private/chat/upgrade-prompt";
 import { useSearchParams, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 // Add these types at the top of the file after imports
 interface AIMessage {
@@ -25,7 +26,13 @@ interface AIMessage {
 }
 
 export default function ChatPage() {
-  const [mentor, setMentor] = useState<MentorType>("MONK");
+  // Initialize mentor from cookie or default to MONK
+  const [mentor, setMentor] = useState<MentorType>(() => {
+    // Get from cookie on initial render only
+    const saved = Cookies.get("preferred_mentor");
+    return (saved as MentorType) || "MONK";
+  });
+
   const [remainingMessages, setRemainingMessages] = useState<number | null>(
     null
   );
@@ -58,21 +65,7 @@ export default function ChatPage() {
     },
   });
 
-  const checkUserStatus = async () => {
-    if (!user?.id) return;
-    try {
-      const response = await fetch("/api/chat/usage/status");
-      const data = await response.json();
-      setIsPaid(data.paid);
-      if (!data.paid) {
-        fetchRemainingMessages();
-      }
-    } catch (error) {
-      console.error("Failed to fetch user status:", error);
-    }
-  };
-
-  const fetchRemainingMessages = async () => {
+  const fetchRemainingMessages = useCallback(async () => {
     if (!user?.id) return;
     try {
       const response = await fetch(`/api/chat/usage?userId=${user.id}`);
@@ -87,10 +80,23 @@ export default function ChatPage() {
       console.error("Failed to fetch remaining messages:", error);
       toast.error("Failed to fetch message limit status.");
     }
-  };
+  }, [user?.id]);
 
-  // Fetch chat history
-  const fetchChatHistory = async () => {
+  const checkUserStatus = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch("/api/chat/usage/status");
+      const data = await response.json();
+      setIsPaid(data.paid);
+      if (!data.paid) {
+        fetchRemainingMessages();
+      }
+    } catch (error) {
+      console.error("Failed to fetch user status:", error);
+    }
+  }, [user?.id, fetchRemainingMessages]);
+
+  const fetchChatHistory = useCallback(async () => {
     if (!user?.id) return;
     try {
       setIsLoadingHistory(true);
@@ -119,14 +125,19 @@ export default function ChatPage() {
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, [user?.id, setMessages]);
+
+  // Update cookie when mentor changes
+  useEffect(() => {
+    Cookies.set("preferred_mentor", mentor, { expires: 365 });
+  }, [mentor]);
 
   useEffect(() => {
     if (user?.id) {
       checkUserStatus();
       fetchChatHistory();
     }
-  }, [user?.id]);
+  }, [user?.id, checkUserStatus, fetchChatHistory]);
 
   // Handle successful payment
   useEffect(() => {
@@ -139,7 +150,7 @@ export default function ChatPage() {
       // Remove the success parameter from the URL
       router.replace("/chat");
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, checkUserStatus]);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
