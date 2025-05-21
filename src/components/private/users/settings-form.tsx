@@ -6,10 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
   updateSettings,
-  resetProgress,
+  //resetProgress,
   deleteAccount,
-} from "@/app/(private)/(admin)/(users)/monk/settings/actions";
-import type { UpdateSettingsInput } from "@/app/(private)/(admin)/(users)/monk/settings/actions";
+} from "@/app/(chat)/chat/settings/actions";
+import type { UpdateSettingsInput } from "@/app/(chat)/chat/settings/actions";
 import { useRouter } from "next/navigation";
 import { paths } from "@/lib/path";
 
@@ -151,7 +151,7 @@ export function SettingsForm({ userId, initialSettings }: SettingsFormProps) {
       <Card className="p-6 bg-black/40 space-y-4">
         <h2 className="font-mono text-red-500">DANGER ZONE</h2>
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div>
               <h3 className="font-medium">Reset Progress</h3>
               <p className="text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export function SettingsForm({ userId, initialSettings }: SettingsFormProps) {
             >
               Reset
             </Button>
-          </div>
+          </div> */}
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-medium">Delete Account</h3>

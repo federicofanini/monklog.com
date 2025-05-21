@@ -16,6 +16,10 @@ export default async function SettingsPage() {
 
   const profile = await getUserProfile(user.id);
 
+  if (!profile) {
+    throw new Error("User profile not found");
+  }
+
   // Initialize settings if they don't exist
   if (!profile.settings) {
     const { success, settings } = await initializeSettings(user.id);
@@ -36,5 +40,9 @@ export default async function SettingsPage() {
     shareProgress: profile.settings.share_progress,
   };
 
-  return <SettingsForm userId={user.id} initialSettings={currentSettings} />;
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <SettingsForm userId={user.id} initialSettings={currentSettings} />
+    </div>
+  );
 }

@@ -8,6 +8,8 @@ import type {
   Mission,
   Achievement,
   UserAchievement,
+  MentorPersona,
+  Role,
 } from "@prisma/client";
 
 // Type definitions
@@ -55,7 +57,9 @@ export interface UserStats {
   };
 }
 
-export async function getUserProfile(userId: string): Promise<UserProfile> {
+export async function getUserProfile(
+  userId: string
+): Promise<UserProfile | null> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -74,17 +78,39 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
             mission: true,
           },
           take: 1,
+          orderBy: {
+            start_date: "desc",
+          },
         },
       },
       cacheStrategy: { ttl: HOUR },
     });
 
-    if (!user) throw new Error("User not found");
+    if (!user) {
+      return null;
+    }
 
     const currentMission = user.missions[0];
 
     return {
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        full_name: user.full_name,
+        avatar_url: user.avatar_url,
+        paid: user.paid,
+        role: user.role as Role,
+        joined_at: user.joined_at,
+        mental_toughness_score: user.mental_toughness_score,
+        experience_points: user.experience_points,
+        level: user.level,
+        total_streaks: user.total_streaks,
+        current_streak: user.current_streak,
+        current_mentor_persona: user.current_mentor_persona as MentorPersona,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
       settings: user.settings,
       achievements: user.achievements.map((ua) => ({
         achievement: ua.achievement,
@@ -141,7 +167,7 @@ export async function updateUserSettings(
   }
 }
 
-export async function getUserStats(userId: string): Promise<UserStats> {
+export async function getUserStats(userId: string): Promise<UserStats | null> {
   try {
     const [stats, currentMission] = await Promise.all([
       prisma.dailyStats.findMany({
@@ -157,6 +183,9 @@ export async function getUserStats(userId: string): Promise<UserStats> {
         },
         include: {
           mission: true,
+        },
+        orderBy: {
+          start_date: "desc",
         },
         cacheStrategy: { ttl: HOUR },
       }),
