@@ -5,7 +5,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { siteConfig } from "@/lib/config";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { Logo } from "./logo";
 
 export function FooterSection() {
   const tablet = useMediaQuery("(max-width: 1024px)");
@@ -17,8 +16,7 @@ export function FooterSection() {
           {/* Brand Section */}
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-3">
-              <Logo className="size-8 text-red-500" />
-              <p className="text-xl font-bold text-white">MONKLOG</p>
+              <p className="text-xl font-bold text-red-500">MonkLog</p>
             </Link>
             <p className="text-white/60 font-mono max-w-sm">
               Your sergeant. Hardwired for one mission: YOUR TRANSFORMATION.

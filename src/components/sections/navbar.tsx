@@ -3,14 +3,11 @@
 import { siteConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
-import { AnimatePresence, motion, useScroll } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Logo } from "./logo";
 
 export function Navbar() {
-  const { scrollY } = useScroll();
-  const [hasScrolled, setHasScrolled] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
 
@@ -36,30 +33,19 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = scrollY.on("change", (latest) => {
-      setHasScrolled(latest > 10);
-    });
-    return unsubscribe;
-  }, [scrollY]);
-
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const handleOverlayClick = () => setIsDrawerOpen(false);
 
   return (
     <header
       className={cn(
-        "sticky z-50 top-0 w-full transition-all duration-300",
-        hasScrolled
-          ? "bg-black/90 backdrop-blur-sm border-b border-red-500/20"
-          : "bg-transparent"
+        "sticky z-50 top-0 w-full transition-all duration-300 bg-black/90 backdrop-blur-sm border-b border-red-500/20"
       )}
     >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Logo className="size-8 text-red-500" />
-            <p className="text-xl font-bold text-white">MONKLOG</p>
+            <p className="text-xl font-bold text-red-500">MonkLog</p>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">

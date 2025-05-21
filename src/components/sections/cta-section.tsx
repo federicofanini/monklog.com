@@ -52,7 +52,9 @@ export function CTASection() {
           {/* Monthly Plan */}
           <div className="border border-red-500/20 p-8 bg-black/40 space-y-4">
             <h3 className="text-xl font-bold text-white">WARRIOR</h3>
-            <div className="text-3xl font-bold text-red-500">$19.99</div>
+            <div className="text-3xl font-bold text-red-500">
+              $5<p className="text-xs text-white/60 font-mono">excl. vat</p>
+            </div>
             <p className="text-sm text-white/60 font-mono">Monthly</p>
             <ul className="space-y-3 text-left mt-6">
               <li className="flex items-center gap-2 text-white/60 font-mono text-sm">
@@ -82,8 +84,10 @@ export function CTASection() {
               <p className="text-xs font-medium">MOST POPULAR</p>
             </div>
             <h3 className="text-xl font-bold text-white">WARLORD</h3>
-            <div className="text-3xl font-bold text-red-500">$199</div>
-            <p className="text-sm text-white/60 font-mono">Annual (Save 17%)</p>
+            <div className="text-3xl font-bold text-red-500">
+              $50 <p className="text-xs text-white/60 font-mono">excl. vat</p>
+            </div>
+            <p className="text-sm text-white/60 font-mono">Annual (Save 20%)</p>
             <ul className="space-y-3 text-left mt-6">
               <li className="flex items-center gap-2 text-white/60 font-mono text-sm">
                 <span className="text-red-500">→</span>
