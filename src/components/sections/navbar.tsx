@@ -68,7 +68,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-4">
             <Link
-              href={paths.users.home}
+              href={paths.api.login}
               className="hidden md:flex h-9 items-center px-6 bg-red-500 hover:bg-red-600 text-white font-mono text-sm uppercase tracking-wider transition-all duration-300"
             >
               ENLIST NOW

@@ -1,3 +1,4 @@
+import { paths } from "@/lib/path";
 import { freeMessages } from "@/packages/ai/free-messages";
 import Link from "next/link";
 
@@ -44,7 +45,7 @@ export function CTASection() {
               </li>
             </ul>
             <Link
-              href="/onboarding"
+              href={paths.api.login}
               className="block w-full bg-white/10 hover:bg-white/20 text-white font-mono px-6 py-3 mt-6 transition-all duration-300"
             >
               START FREE
@@ -73,7 +74,7 @@ export function CTASection() {
               </li>
             </ul>
             <Link
-              href="/onboarding"
+              href={paths.api.login}
               className="block w-full bg-red-500 hover:bg-red-600 text-white font-mono px-6 py-3 mt-6 transition-all duration-300"
             >
               ENLIST NOW
@@ -105,7 +106,7 @@ export function CTASection() {
               </li>
             </ul>
             <Link
-              href="/onboarding"
+              href={paths.api.login}
               className="block w-full bg-red-500 hover:bg-red-600 text-white font-mono px-6 py-3 mt-6 transition-all duration-300"
             >
               COMMIT FULLY

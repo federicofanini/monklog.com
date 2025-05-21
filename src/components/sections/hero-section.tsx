@@ -54,7 +54,7 @@ export function HeroSection() {
 
         <div className="flex flex-col items-center gap-6">
           <Link
-            href="/chat"
+            href={paths.api.login}
             className="bg-red-500 hover:bg-red-600 text-white font-mono px-8 py-4 rounded-none transition-all duration-300 text-lg uppercase tracking-wider w-full max-w-sm"
           >
             FORGE YOUR FUTURE, NOW.
