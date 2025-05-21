@@ -9,7 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, CornerDownLeft } from "lucide-react";
+import { Loader2, CornerDownLeft, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
@@ -127,6 +127,29 @@ export default function ChatPage() {
     }
   }, [user?.id, setMessages]);
 
+  const clearChat = useCallback(async () => {
+    try {
+      // Clear messages from UI
+      setMessages([]);
+
+      // Clear messages from database
+      const response = await fetch("/api/chat/history/clear", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to clear chat history");
+      }
+
+      toast.success("Chat cleared");
+    } catch (error) {
+      console.error("Failed to clear chat:", error);
+      toast.error("Failed to clear chat history");
+      // Refetch messages to ensure UI is in sync with database
+      fetchChatHistory();
+    }
+  }, [setMessages, fetchChatHistory]);
+
   // Update cookie when mentor changes
   useEffect(() => {
     Cookies.set("preferred_mentor", mentor, { expires: 365 });
@@ -166,14 +189,25 @@ export default function ChatPage() {
           <div className="space-y-4 max-w-3xl mx-auto">
             {/* Message count indicator */}
             <div className="sticky top-0 z-10 flex justify-between items-center px-1 py-2 bg-black/80 backdrop-blur-sm border-b border-red-500/10 mb-4">
-              <div className="font-mono text-[10px] text-white/30">
-                {isLoadingHistory
-                  ? "Loading history..."
-                  : messages.length > 0
-                  ? `${messages.length} message${
-                      messages.length !== 1 ? "s" : ""
-                    }`
-                  : "No messages"}
+              <div className="flex items-center gap-4">
+                <div className="font-mono text-[10px] text-white/30">
+                  {isLoadingHistory
+                    ? "Loading history..."
+                    : messages.length > 0
+                    ? `${messages.length} message${
+                        messages.length !== 1 ? "s" : ""
+                      }`
+                    : "No messages"}
+                </div>
+                {messages.length > 0 && (
+                  <button
+                    onClick={clearChat}
+                    className="flex items-center gap-1 text-[10px] font-mono text-red-500/50 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Clear
+                  </button>
+                )}
               </div>
               {!isPaid && (
                 <div className="font-mono text-[10px] text-white/30">
@@ -197,7 +231,7 @@ export default function ChatPage() {
                     TRANSMISSION INITIALIZED
                   </div>
                   <div className="font-mono text-base sm:text-lg">
-                    Welcome to MonkLog AI. Ready to push your limits?
+                    Ready to push your limits?
                   </div>
                 </div>
 
