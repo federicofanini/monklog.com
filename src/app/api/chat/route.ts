@@ -23,16 +23,6 @@ const mentorPrompts: Record<MentorType, string> = {
   CEO: ceoPrompt,
 };
 
-// Enhanced system prompts to ensure consistent formatting
-const formatPrompts: Record<MentorType, string> = {
-  GHOST:
-    "You can respond naturally, but maintain your cold, sharp tone. When giving challenges, mark them with [CHALLENGE]. Keep responses brief and intense.",
-  MONK: "You can respond conversationally while maintaining your stoic wisdom. Use [INSIGHT] for key philosophical points when relevant. If suggesting a path forward, mark it with [PATH].",
-  WARRIOR:
-    "Respond naturally but maintain your commanding presence. When giving direct orders or action items, mark them with [ORDERS]. Keep it intense and focused.",
-  CEO: "Stay strategic but conversational. When providing key analysis, mark it with [ANALYSIS]. For specific goals or metrics, use [OBJECTIVE]. Focus on execution.",
-};
-
 export const maxDuration = 10; // Allow streaming responses up to 30 seconds
 
 // Map frontend mentor types to schema enum
@@ -56,9 +46,7 @@ export async function POST(req: Request) {
     const { messages, mentor = "MONK" } = await req.json();
 
     // Get the appropriate mentor prompt and combine with format
-    const systemPrompt = `${mentorPrompts[mentor as MentorType]}\n\n${
-      formatPrompts[mentor as MentorType]
-    }`;
+    const systemPrompt = `${mentorPrompts[mentor as MentorType]}`;
 
     if (!systemPrompt) {
       return NextResponse.json(

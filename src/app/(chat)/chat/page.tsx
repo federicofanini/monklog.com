@@ -9,7 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, CornerDownLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
@@ -257,14 +257,33 @@ export default function ChatPage() {
           <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3">
             <form onSubmit={handleSubmit} className="relative">
               <div className="flex gap-2">
-                <Textarea
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder="Share your truth..."
-                  className="min-h-[44px] max-h-[200px] bg-black/40 resize-none border-red-500/20 focus:ring-1 focus:ring-red-500/40 placeholder:text-white/20 text-sm font-mono"
-                  rows={1}
-                  disabled={isLoading || (!isPaid && remainingMessages === 0)}
-                />
+                <div className="relative flex-1">
+                  <Textarea
+                    value={input}
+                    onChange={handleInputChange}
+                    onKeyDown={(e) => {
+                      // Send on Enter (without shift) or Cmd/Ctrl + Enter
+                      if (
+                        (e.key === "Enter" && !e.shiftKey) ||
+                        (e.key === "Enter" && (e.metaKey || e.ctrlKey))
+                      ) {
+                        e.preventDefault();
+                        handleSubmit(
+                          e as unknown as React.FormEvent<HTMLFormElement>
+                        );
+                      }
+                    }}
+                    placeholder="Share your truth..."
+                    className="min-h-[44px] max-h-[200px] bg-black/40 resize-none border-red-500/20 focus:ring-1 focus:ring-red-500/40 placeholder:text-white/20 text-sm font-mono pr-12"
+                    rows={1}
+                    disabled={isLoading || (!isPaid && remainingMessages === 0)}
+                  />
+                  <div className="absolute right-3 bottom-2 flex items-center gap-2 pointer-events-none">
+                    <span className="text-[10px] font-mono text-white/20">
+                      Press <CornerDownLeft className="h-3 w-3 inline" />
+                    </span>
+                  </div>
+                </div>
                 <div className="flex flex-col justify-end gap-2">
                   <MentorSelect value={mentor} onValueChange={setMentor} />
                   <Button
