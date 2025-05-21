@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { paths } from "@/lib/path";
 import { ChatHeader } from "@/components/private/chat/chat-header";
 import { Toaster } from "@/components/ui/sonner";
+import { prisma } from "@/packages/database/prisma";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -31,11 +32,38 @@ export default async function ChatLayout({
     redirect(paths.api.login);
   }
 
-  return (
-    <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-black to-neutral-950">
-      <ChatHeader />
-      {children}
-      <Toaster />
-    </div>
-  );
+  try {
+    // Check if user exists and has settings
+    const user = await prisma.user.findUnique({
+      where: { id: kindeUser.id },
+      include: { settings: true },
+    });
+
+    // If user doesn't exist, create them and set up default data
+    if (!user) {
+      await prisma.user.create({
+        data: {
+          id: kindeUser.id,
+          email: kindeUser.email,
+          full_name:
+            `${kindeUser.given_name || ""} ${
+              kindeUser.family_name || ""
+            }`.trim() || "Anonymous User",
+          avatar_url: kindeUser.picture || undefined,
+          role: "MONK",
+        },
+      });
+    }
+
+    return (
+      <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-black to-neutral-950">
+        <ChatHeader />
+        {children}
+        <Toaster />
+      </div>
+    );
+  } catch (error) {
+    console.error("Error in chat layout:", error);
+    redirect(paths.api.login);
+  }
 }
