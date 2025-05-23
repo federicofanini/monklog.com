@@ -7,6 +7,7 @@ import { ChatHeader } from "@/components/private/chat/chat-header";
 import { Toaster } from "@/components/ui/sonner";
 import { prisma } from "@/packages/database/prisma";
 import { kv } from "@/packages/kv/redis";
+import { Providers } from "@/components/providers";
 
 async function initUserChatUsage(userId: string) {
   try {
@@ -81,10 +82,12 @@ export default async function ChatLayout({
     }
 
     return (
-      <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-black to-neutral-950">
-        <ChatHeader />
-        {children}
-        <Toaster />
+      <div className="relative flex flex-col min-h-screen bg-black">
+        <Providers>
+          <ChatHeader />
+          {children}
+          <Toaster />
+        </Providers>
       </div>
     );
   } catch (error) {
