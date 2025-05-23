@@ -120,7 +120,7 @@ export function ProfileStatsCard({ stats }: ProfileStatsCardProps) {
           <div className="space-y-3">
             <div>
               <p className="text-2xl font-mono text-white/90">
-                {Math.round(stats.nutrition_trends.avg_weekly_quality)}/10
+                {Math.round(stats.nutrition_trends.avg_weekly_quality)}/100
               </p>
               <p className="font-mono text-xs text-white/60">
                 Avg. Food Quality
