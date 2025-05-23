@@ -333,11 +333,141 @@ export async function getRecentActivity(limit: number = 10) {
 }
 
 export async function getAggregatedStats(
-  timeframe: number = 30
+  timeframe: number = 30,
+  userId?: string
 ): Promise<AggregatedStats | null> {
   try {
-    const stats = await getProfileStats(timeframe);
-    if (!stats) return null;
+    let targetUserId: string;
+
+    if (userId) {
+      targetUserId = userId;
+    } else {
+      const { getUser } = getKindeServerSession();
+      const user = await getUser();
+
+      if (!user?.id) {
+        throw new Error("Unauthorized: User not found");
+      }
+
+      targetUserId = user.id;
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - timeframe);
+
+    // Use targetUserId in all queries
+    const [foodLogs, healthLogs, sleepLogs] = await Promise.all([
+      prisma.food.findMany({
+        where: {
+          userId: targetUserId,
+          created_at: { gte: startDate },
+        },
+        orderBy: { created_at: "desc" },
+      }),
+      prisma.health.findMany({
+        where: {
+          userId: targetUserId,
+          created_at: { gte: startDate },
+        },
+        orderBy: { created_at: "desc" },
+      }),
+      prisma.sleep.findMany({
+        where: {
+          userId: targetUserId,
+          created_at: { gte: startDate },
+        },
+        orderBy: { created_at: "desc" },
+      }),
+    ]);
+
+    // Calculate streaks in parallel
+    const [foodStreak, healthStreak, sleepStreak] = await Promise.all([
+      calculateStreakDays(foodLogs.map((log) => log.created_at)),
+      calculateStreakDays(healthLogs.map((log) => log.created_at)),
+      calculateStreakDays(sleepLogs.map((log) => log.created_at)),
+    ]);
+
+    // Calculate health summary
+    const moodCounts = healthLogs.reduce((acc, log) => {
+      acc[log.daily_mood] = (acc[log.daily_mood] || 0) + 1;
+      return acc;
+    }, {} as Record<Mood, number>);
+
+    const mostCommonMood = Object.entries(moodCounts).reduce(
+      (a, b) => (b[1] > a[1] ? b : a),
+      ["OK", 0]
+    )[0] as Mood;
+
+    // Aggregate statistics
+    const stats: ProfileStats = {
+      logs: {
+        food: {
+          total_count: foodLogs.length,
+          last_log: foodLogs[0]?.created_at || null,
+          streak_days: foodStreak,
+        },
+        health: {
+          total_count: healthLogs.length,
+          last_log: healthLogs[0]?.created_at || null,
+          streak_days: healthStreak,
+        },
+        sleep: {
+          total_count: sleepLogs.length,
+          last_log: sleepLogs[0]?.created_at || null,
+          streak_days: sleepStreak,
+        },
+      },
+      health_summary: {
+        avg_steps: Math.round(
+          healthLogs.reduce((sum, log) => sum + log.steps, 0) /
+            healthLogs.length || 0
+        ),
+        total_cardio_minutes: healthLogs.reduce(
+          (sum, log) => sum + log.cardio,
+          0
+        ),
+        total_strength_minutes: healthLogs.reduce(
+          (sum, log) => sum + log.daily_strength,
+          0
+        ),
+        most_common_mood: mostCommonMood,
+        total_water_ml: healthLogs.reduce((sum, log) => sum + log.water, 0),
+      },
+      sleep_summary: {
+        avg_sleep_score: Math.round(
+          sleepLogs.reduce((sum, log) => sum + log.sleep_score, 0) /
+            sleepLogs.length || 0
+        ),
+        avg_sleep_duration: Math.round(
+          sleepLogs.reduce((sum, log) => sum + log.time_in_bed, 0) /
+            sleepLogs.length || 0
+        ),
+        total_sleep_hours: Math.round(
+          sleepLogs.reduce((sum, log) => sum + log.time_in_bed, 0) / 60
+        ),
+      },
+      nutrition_summary: {
+        avg_food_quality: Math.round(
+          foodLogs.reduce((sum, log) => sum + log.food_quality, 0) /
+            foodLogs.length || 0
+        ),
+        total_calories: foodLogs.reduce((sum, log) => sum + log.calories, 0),
+        avg_macros: {
+          protein: Math.round(
+            foodLogs.reduce((sum, log) => sum + log.protein, 0) /
+              foodLogs.length || 0
+          ),
+          carbs: Math.round(
+            foodLogs.reduce((sum, log) => sum + log.carbs, 0) /
+              foodLogs.length || 0
+          ),
+          fat: Math.round(
+            foodLogs.reduce((sum, log) => sum + log.fat, 0) / foodLogs.length ||
+              0
+          ),
+        },
+      },
+    };
 
     const totalDays = timeframe;
     const daysWithAnyLog = Math.max(
