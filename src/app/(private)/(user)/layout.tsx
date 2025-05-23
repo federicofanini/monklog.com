@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { prisma } from "@/packages/database/prisma";
 import { kv } from "@/packages/kv/redis";
 import { Providers } from "@/components/providers";
+import { PricingOverlay } from "@/components/private/pricing-component";
 
 async function initUserChatUsage(userId: string) {
   try {
@@ -85,6 +86,7 @@ export default async function ChatLayout({
       <div className="relative flex flex-col min-h-screen bg-black">
         <Providers>
           <ChatHeader />
+          {!user.paid && <PricingOverlay />}
           {children}
           <Toaster />
         </Providers>

@@ -57,8 +57,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      mode: plan.interval === "one-time" ? "payment" : "subscription",
-      success_url: `${appUrl}/chat?success=true`,
+      mode: plan.interval === "lifetime" ? "payment" : "subscription",
+      success_url: `${appUrl}/profile?success=true`,
       cancel_url: `${appUrl}/pricing?canceled=true`,
       metadata: {
         userId: user.id,

@@ -30,8 +30,8 @@ export const STRIPE_PLANS = {
   },
   LIFETIME: {
     name: "Lifetime",
-    price: 85,
+    price: 19,
     priceId: process.env.STRIPE_PRICE_LIFETIME_ID,
-    interval: "one-time",
+    interval: "lifetime",
   },
 } as const;

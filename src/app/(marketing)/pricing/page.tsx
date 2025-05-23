@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Zap } from "lucide-react";
+import { ArrowRight, Check, Dot, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,15 +9,22 @@ import { STRIPE_PLANS } from "@/packages/stripe/config";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Suspense } from "react";
+import { FAQSection } from "@/components/sections/faq-section";
 
 const features = [
-  "Unlimited daily messages",
-  "Access to all mentor personas",
-  "Priority response time",
-  "Advanced habit tracking",
-  "Custom challenges",
-  "Progress analytics",
-];
+  { text: "Track your progress", soon: false },
+  { text: "Share your public profile", soon: false },
+  { text: "Access to the Whatsapp Community", soon: false },
+  {
+    text: "Stay motivated and share your work with the community",
+    soon: false,
+  },
+  { text: "Lifetime access", soon: false },
+  { text: "Advanced habit tracking", soon: true },
+  { text: "Monk Mentor AI chat", soon: true },
+  { text: "Custom challenges", soon: true },
+  { text: "Access to all mentor personas", soon: true },
+] as const;
 
 interface PricingPlan {
   name: string;
@@ -25,12 +32,12 @@ interface PricingPlan {
   interval: string;
   priceId?: string;
   description: string;
-  features: string[];
+  features: typeof features;
   popular?: boolean;
 }
 
 const plans: PricingPlan[] = [
-  {
+  /*{
     ...STRIPE_PLANS.MONTHLY,
     description: "Perfect for trying out MonkLog",
     features: features,
@@ -40,17 +47,18 @@ const plans: PricingPlan[] = [
     description: "Our most popular plan",
     features: features,
     popular: true,
-  },
+  },*/
   {
     ...STRIPE_PLANS.LIFETIME,
     description: "Best value for long-term growth",
     features: features,
+    popular: true,
   },
 ];
 
 // Separate the pricing content into its own client component
 function PricingContent() {
-  const [selectedPlan, setSelectedPlan] = useState<string>("Yearly");
+  const [selectedPlan, setSelectedPlan] = useState<string>("Lifetime");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -62,7 +70,7 @@ function PricingContent() {
 
     if (success) {
       toast.success("Payment successful! Welcome to MonkLog Pro!");
-      router.replace("/chat"); // Remove query params and redirect
+      router.replace("/profile"); // Remove query params and redirect
     }
 
     if (canceled) {
@@ -111,9 +119,9 @@ function PricingContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950">
+    <div className="flex min-h-screen flex-col bg-black">
       <main className="flex-1">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           {/* Header */}
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
@@ -122,27 +130,22 @@ function PricingContent() {
             <p className="mt-4 text-base text-white/70">
               Choose the plan that best fits your journey. All plans include
               full access to features.
-              <br />
-              Prices exclude VAT.
             </p>
           </div>
 
           {/* Pricing Cards */}
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-16 grid grid-cols-1 gap-6 lg:gap-8">
             {plans.map((plan) => (
               <div
                 key={plan.name}
                 onClick={() => setSelectedPlan(plan.name)}
                 className={cn(
-                  "relative cursor-pointer rounded-2xl border p-8 transition-all duration-200",
-                  plan.name === selectedPlan
-                    ? "border-red-500/50 bg-red-500/5"
-                    : "border-white/10 bg-black/40 hover:border-white/20"
+                  "relative cursor-pointer rounded-2xl border p-8 transition-all duration-200 border-red-500/50 bg-red-500/5"
                 )}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-0 right-0 mx-auto w-fit rounded-full bg-red-500 px-3 py-1">
-                    <p className="text-xs font-medium">MOST POPULAR</p>
+                    <p className="text-xs font-medium">FORGE YOUR FUTURE</p>
                   </div>
                 )}
 
@@ -150,14 +153,7 @@ function PricingContent() {
                   <h3 className="text-lg font-semibold text-white">
                     {plan.name}
                   </h3>
-                  <Zap
-                    className={cn(
-                      "h-5 w-5",
-                      plan.name === selectedPlan
-                        ? "text-red-500"
-                        : "text-white/30"
-                    )}
-                  />
+                  <Zap className={cn("h-5 w-5 text-red-500")} />
                 </div>
 
                 <p className="mt-2 text-sm text-white/70">{plan.description}</p>
@@ -173,25 +169,27 @@ function PricingContent() {
 
                 <ul className="mt-8 space-y-3">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
+                    <li key={feature.text} className="flex items-center gap-2">
                       <div
                         className={cn(
-                          "flex h-5 w-5 items-center justify-center rounded-full",
-                          plan.name === selectedPlan
-                            ? "bg-red-500/20"
-                            : "bg-white/10"
+                          "flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20"
                         )}
                       >
-                        <Check
-                          className={cn(
-                            "h-3 w-3",
-                            plan.name === selectedPlan
-                              ? "text-red-500"
-                              : "text-white/50"
-                          )}
-                        />
+                        <Check className={cn("h-3 w-3 text-red-500")} />
                       </div>
-                      <span className="text-sm text-white/70">{feature}</span>
+                      <span className="text-sm text-white/70 flex items-center gap-2">
+                        {feature.text}
+                        {feature.soon ? (
+                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 rounded-full">
+                            soon
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-0.5 text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 rounded-full">
+                            <Dot className="size-4 animate-pulse" />
+                            live
+                          </span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -199,9 +197,7 @@ function PricingContent() {
                 <Button
                   className={cn(
                     "mt-8 w-full font-mono",
-                    plan.name === selectedPlan
-                      ? "bg-red-500 hover:bg-red-600"
-                      : "bg-white/10 hover:bg-white/20"
+                    "bg-red-500 hover:bg-red-600"
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -229,10 +225,10 @@ function PricingContent() {
             <p className="text-sm text-white/50">
               Questions? Contact us at{" "}
               <a
-                href="mailto:support@monklog.com"
+                href="mailto:fedef@gymbrah.com"
                 className="text-red-500 hover:text-red-400"
               >
-                support@monklog.com
+                fedef@gymbrah.com
               </a>
             </p>
           </div>
@@ -247,6 +243,7 @@ export default function PricingPage() {
   return (
     <Suspense fallback={<PricingFallback />}>
       <PricingContent />
+      <FAQSection />
     </Suspense>
   );
 }
