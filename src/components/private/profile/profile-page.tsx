@@ -2,6 +2,7 @@
 
 import { DailyLogs } from "@/components/private/profile/daily-logs";
 import { ProfileStatsCard } from "@/components/private/profile/profile-stats-card";
+import { QuickActions } from "@/components/private/profile/quick-actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -105,6 +106,11 @@ export function ProfilePage() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-6">
+          <QuickActions />
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
