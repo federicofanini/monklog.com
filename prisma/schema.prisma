@@ -30,6 +30,14 @@ enum MessageRole {
   assistant
 }
 
+enum Mood {
+  GREAT
+  GOOD
+  OK
+  BAD
+  HORRIBLE
+}
+
 model User {
   id         String  @id @default(uuid())
   email      String  @unique
@@ -58,9 +66,10 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  plans Plan[]
-  sleep Sleep[]
-  food  Food[]
+  plans  Plan[]
+  sleep  Sleep[]
+  food   Food[]
+  health Health[]
 }
 
 model UserSettings {
@@ -129,6 +138,25 @@ model Food {
   fat          Int
   calories     Int
   food_quality Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Health {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  water          Int
+  steps          Int
+  cardio         Int // minutes
+  daily_light    Int // minutes
+  daily_strength Int // minutes
+  daily_mood     Mood @default(OK)
+  caffeine       Int // mg
+  alcohol        Int // g
+  sigarettes     Int // count
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
