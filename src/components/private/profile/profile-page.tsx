@@ -4,6 +4,7 @@ import { DailyLogs } from "@/components/private/profile/daily-logs";
 import { ProfileStatsCard } from "@/components/private/profile/profile-stats-card";
 import { QuickActions } from "@/components/private/profile/quick-actions";
 import { Button } from "@/components/ui/button";
+import { PublicProfileLink } from "@/components/private/settings/public-profile-link";
 import {
   Card,
   CardDescription,
@@ -15,13 +16,16 @@ import {
   getAggregatedStats,
   getDailyAggregation,
 } from "@/packages/database/user/profile";
+import { getCurrentUsername } from "@/packages/database/user/username";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function ProfilePage() {
   const [timeframe, setTimeframe] = useState(30);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const router = useRouter();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["profile-stats", timeframe],
@@ -33,6 +37,11 @@ export function ProfilePage() {
     queryFn: () => getDailyAggregation(selectedDate),
   });
 
+  const { data: usernameData, isLoading: usernameLoading } = useQuery({
+    queryKey: ["username"],
+    queryFn: () => getCurrentUsername(),
+  });
+
   const handleTimeframeChange = (days: number) => {
     setTimeframe(days);
   };
@@ -41,7 +50,14 @@ export function ProfilePage() {
     setSelectedDate(date);
   };
 
-  if (statsLoading || dailyLoading || !stats || !dailyData) {
+  if (
+    statsLoading ||
+    dailyLoading ||
+    usernameLoading ||
+    !stats ||
+    !dailyData ||
+    !usernameData?.success
+  ) {
     return (
       <div className="bg-black py-18">
         <div className="max-w-4xl mx-auto p-4">
@@ -72,38 +88,48 @@ export function ProfilePage() {
               Track your health, sleep, and nutrition progress
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newDate = new Date(selectedDate);
+                  newDate.setDate(newDate.getDate() - 1);
+                  handleDateChange(newDate);
+                }}
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleDateChange(new Date())}
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+              >
+                Today
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newDate = new Date(selectedDate);
+                  newDate.setDate(newDate.getDate() + 1);
+                  handleDateChange(newDate);
+                }}
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(newDate.getDate() - 1);
-                handleDateChange(newDate);
-              }}
+              onClick={() => router.push("/settings")}
               className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
             >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDateChange(new Date())}
-              className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
-            >
-              Today
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(newDate.getDate() + 1);
-                handleDateChange(newDate);
-              }}
-              className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
-            >
-              <ChevronRight className="h-4 w-4" />
+              <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -111,6 +137,11 @@ export function ProfilePage() {
         {/* Quick Actions */}
         <div className="mb-6">
           <QuickActions />
+        </div>
+
+        {/* Public Profile Link */}
+        <div className="mb-6">
+          <PublicProfileLink username={usernameData?.username} />
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
