@@ -37,7 +37,7 @@ export async function addSleepRecord(data: SleepData) {
     });
 
     // Revalidate both the page and the API route
-    revalidatePath("/log");
+    revalidatePath("/sleep");
     revalidatePath("/api/sleep");
     return { success: true, data: sleep };
   } catch (error) {
@@ -81,7 +81,7 @@ export async function updateSleepRecord(id: string, data: Partial<SleepData>) {
     });
 
     // Revalidate both the page and the API route
-    revalidatePath("/log");
+    revalidatePath("/sleep");
     revalidatePath("/api/sleep");
     return { success: true, data: sleep };
   } catch (error) {
@@ -141,7 +141,7 @@ export async function deleteSleepRecord(id: string) {
     });
 
     // Revalidate both the page and the API route
-    revalidatePath("/log");
+    revalidatePath("/sleep");
     revalidatePath("/api/sleep");
     return { success: true };
   } catch (error) {

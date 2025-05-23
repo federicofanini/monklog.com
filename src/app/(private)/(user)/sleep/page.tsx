@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { SleepPage } from "@/components/private/sleep/sleep-page";
 import { Loader2 } from "lucide-react";
 
-export default function LogPage() {
+export default function Sleep() {
   return (
     <Suspense
       fallback={
