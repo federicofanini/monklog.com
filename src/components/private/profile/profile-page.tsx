@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { WhatsAppBanner } from "./whatsapp";
 
 export function ProfilePage() {
   const [timeframe, setTimeframe] = useState(30);
@@ -79,7 +80,7 @@ export function ProfilePage() {
   return (
     <div className="bg-black py-18">
       <div className="max-w-4xl mx-auto p-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6">
           <div>
             <h1 className="font-mono text-lg text-white/90">
               Profile Overview
@@ -88,8 +89,8 @@ export function ProfilePage() {
               Track your health, sleep, and nutrition progress
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-4 w-full sm:w-auto">
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
@@ -98,7 +99,7 @@ export function ProfilePage() {
                   newDate.setDate(newDate.getDate() - 1);
                   handleDateChange(newDate);
                 }}
-                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0 flex-1 sm:flex-none"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -106,7 +107,7 @@ export function ProfilePage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleDateChange(new Date())}
-                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0 flex-1 sm:flex-none"
               >
                 Today
               </Button>
@@ -118,7 +119,7 @@ export function ProfilePage() {
                   newDate.setDate(newDate.getDate() + 1);
                   handleDateChange(newDate);
                 }}
-                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+                className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0 flex-1 sm:flex-none"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -127,7 +128,7 @@ export function ProfilePage() {
               variant="outline"
               size="sm"
               onClick={() => router.push("/settings")}
-              className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0"
+              className="font-mono text-xs bg-red-500/20 hover:bg-red-500/30 border-0 w-full sm:w-auto"
             >
               <Settings className="h-4 w-4" />
             </Button>
@@ -137,6 +138,11 @@ export function ProfilePage() {
         {/* Quick Actions */}
         <div className="mb-6">
           <QuickActions />
+        </div>
+
+        {/* Whatsapp Banner */}
+        <div className="mb-6">
+          <WhatsAppBanner />
         </div>
 
         {/* Public Profile Link */}
