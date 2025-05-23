@@ -14,7 +14,7 @@ export const paths = {
     history: "/history",
     pricing: "/pricing",
     profile: "/profile",
-    settings: "/chat/settings",
+    settings: "/settings",
     account: "/chat/account",
     billing: "https://billing.stripe.com/p/login/6oUeVc5ki0Pkeg24etgA800",
   },

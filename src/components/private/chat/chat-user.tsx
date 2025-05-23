@@ -68,7 +68,7 @@ export function ChatUserMenu() {
 
         <DropdownMenuSeparator className="bg-red-500/20" />
 
-        <DropdownMenuGroup>
+        {/*<DropdownMenuGroup>
           <Link prefetch href={paths.users.chat}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Chat
@@ -92,26 +92,14 @@ export function ChatUserMenu() {
               Profile
             </DropdownMenuItem>
           </Link>
-        </DropdownMenuGroup>
+        </DropdownMenuGroup>*/}
 
         <DropdownMenuSeparator className="bg-red-500/20" />
 
         <DropdownMenuGroup>
-          <Link prefetch href={paths.users.account}>
-            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
-              Account
-            </DropdownMenuItem>
-          </Link>
-
           <Link prefetch href={paths.users.settings}>
             <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
               Settings
-            </DropdownMenuItem>
-          </Link>
-
-          <Link prefetch href={paths.users.pricing}>
-            <DropdownMenuItem className="font-mono text-muted-foreground hover:text-green-400 hover:bg-red-500/10">
-              Pricing
             </DropdownMenuItem>
           </Link>
 
