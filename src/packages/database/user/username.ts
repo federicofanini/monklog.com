@@ -15,6 +15,24 @@ export type UsernameResponse = {
   username?: string;
 };
 
+export type ToggleProfileResponse = {
+  success: boolean;
+  error?: {
+    type: "UNAUTHORIZED" | "DATABASE_ERROR";
+    message: string;
+  };
+  isPublic?: boolean;
+};
+
+export type PublicProfileStatus = {
+  success: boolean;
+  error?: {
+    type: "UNAUTHORIZED" | "DATABASE_ERROR";
+    message: string;
+  };
+  isPublic?: boolean;
+};
+
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const MIN_LENGTH = 3;
 const MAX_LENGTH = 20;
@@ -168,6 +186,100 @@ export async function getCurrentUsername(): Promise<UsernameResponse> {
       error: {
         type: "INVALID",
         message: "Failed to get current username",
+      },
+    };
+  }
+}
+
+export async function togglePublicProfile(): Promise<ToggleProfileResponse> {
+  try {
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    if (!user?.id) {
+      return {
+        success: false,
+        error: {
+          type: "UNAUTHORIZED",
+          message: "You must be logged in to toggle your profile visibility",
+        },
+      };
+    }
+
+    // First get current settings to determine new value
+    const currentSettings = await prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { public_profile: true },
+    });
+
+    // Get or create user settings with toggled public_profile
+    const userSettings = await prisma.userSettings.upsert({
+      where: {
+        userId: user.id,
+      },
+      update: {
+        public_profile: !(currentSettings?.public_profile ?? false),
+      },
+      create: {
+        userId: user.id,
+        public_profile: true, // Default to true when creating new settings
+      },
+      select: {
+        public_profile: true,
+      },
+    });
+
+    // Revalidate the profile pages
+    revalidatePath("/settings");
+    revalidatePath(`/${user.id}`);
+
+    return {
+      success: true,
+      isPublic: userSettings.public_profile,
+    };
+  } catch (error) {
+    console.error("Error toggling public profile:", error);
+    return {
+      success: false,
+      error: {
+        type: "DATABASE_ERROR",
+        message: "Failed to toggle public profile setting",
+      },
+    };
+  }
+}
+
+export async function getPublicProfileStatus(): Promise<PublicProfileStatus> {
+  try {
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    if (!user?.id) {
+      return {
+        success: false,
+        error: {
+          type: "UNAUTHORIZED",
+          message: "You must be logged in to check profile status",
+        },
+      };
+    }
+
+    const userSettings = await prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { public_profile: true },
+    });
+
+    return {
+      success: true,
+      isPublic: userSettings?.public_profile ?? false,
+    };
+  } catch (error) {
+    console.error("Error checking public profile status:", error);
+    return {
+      success: false,
+      error: {
+        type: "DATABASE_ERROR",
+        message: "Failed to check public profile status",
       },
     };
   }

@@ -14,7 +14,11 @@ import {
   type UsernameResponse,
 } from "@/packages/database/user/username";
 
-export function UsernameSettings() {
+interface UsernameSettingsProps {
+  onUsernameUpdate?: (username: string | undefined) => void;
+}
+
+export function UsernameSettings({ onUsernameUpdate }: UsernameSettingsProps) {
   const [username, setUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState<string | undefined>();
   const [isChecking, setIsChecking] = useState(false);
@@ -31,6 +35,7 @@ export function UsernameSettings() {
     if (result.success && result.username) {
       setCurrentUsername(result.username);
       setUsername(result.username);
+      onUsernameUpdate?.(result.username);
     }
   };
 
@@ -65,6 +70,7 @@ export function UsernameSettings() {
       if (result.success) {
         toast.success("Username updated successfully");
         setCurrentUsername(result.username);
+        onUsernameUpdate?.(result.username);
         setIsEditing(false);
       } else {
         toast.error(result.error?.message || "Failed to update username");

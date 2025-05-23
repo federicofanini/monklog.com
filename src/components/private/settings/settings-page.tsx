@@ -2,8 +2,16 @@
 
 import { BackButton } from "@/components/private/back-button";
 import { UsernameSettings } from "./username-settings";
+import { PublicProfileSettings } from "./public-profile-settings";
+import { useState } from "react";
 
 export function SettingsPage() {
+  const [username, setUsername] = useState<string | undefined>();
+
+  const handleUsernameUpdate = (newUsername: string | undefined) => {
+    setUsername(newUsername);
+  };
+
   return (
     <div className="bg-black py-18">
       <div className="max-w-4xl mx-auto p-4">
@@ -18,8 +26,8 @@ export function SettingsPage() {
         </div>
 
         <div className="space-y-8">
-          <UsernameSettings />
-          {/* Add more settings sections here */}
+          <UsernameSettings onUsernameUpdate={handleUsernameUpdate} />
+          <PublicProfileSettings username={username} />
         </div>
       </div>
     </div>
