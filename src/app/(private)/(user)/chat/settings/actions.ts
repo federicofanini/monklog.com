@@ -94,36 +94,6 @@ export async function resetProgress(userId: string) {
           current_streak: 0,
         },
       });
-
-      // Delete all habit logs
-      await tx.habitLog.deleteMany({
-        where: { userId },
-      });
-
-      // Delete all daily stats
-      await tx.dailyStats.deleteMany({
-        where: { userId },
-      });
-
-      // Delete all user achievements
-      await tx.userAchievement.deleteMany({
-        where: { userId },
-      });
-
-      // Delete all user missions
-      await tx.userMission.deleteMany({
-        where: { userId },
-      });
-
-      // Delete all mentor messages
-      await tx.mentorMessage.deleteMany({
-        where: { userId },
-      });
-
-      // Delete all user rewards
-      await tx.userReward.deleteMany({
-        where: { userId },
-      });
     });
 
     revalidatePath(paths.users.settings);
@@ -140,30 +110,6 @@ export async function deleteAccount(userId: string) {
     await prisma.$transaction(async (tx) => {
       // Delete all related data first (due to foreign key constraints)
       await tx.userSettings.deleteMany({
-        where: { userId },
-      });
-
-      await tx.habitLog.deleteMany({
-        where: { userId },
-      });
-
-      await tx.dailyStats.deleteMany({
-        where: { userId },
-      });
-
-      await tx.userAchievement.deleteMany({
-        where: { userId },
-      });
-
-      await tx.userMission.deleteMany({
-        where: { userId },
-      });
-
-      await tx.mentorMessage.deleteMany({
-        where: { userId },
-      });
-
-      await tx.userReward.deleteMany({
         where: { userId },
       });
 

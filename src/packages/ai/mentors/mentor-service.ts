@@ -13,20 +13,19 @@ import {
   createUserMessage,
 } from "../ai";
 import { kv } from "@/packages/kv/redis";
-import { prisma } from "@/packages/database/prisma";
-import { MentorPersona } from "@prisma/client";
+//import { MentorPersona } from "@prisma/client";
 
 const CACHE_PREFIX = "mentor:";
 const DEFAULT_CACHE_TIMEOUT = 3600; // 1 hour
 const MAX_RESPONSES_PER_DAY = 10;
 
 // Map frontend mentor types to schema enum
-const mentorTypeToPersona: Record<string, MentorPersona> = {
+/*const mentorTypeToPersona: Record<string, MentorPersona> = {
   GHOST: MentorPersona.GHOST,
   MONK: MentorPersona.MONK,
   WARRIOR: MentorPersona.WARRIOR,
   CEO: MentorPersona.SHADOW,
-};
+};*/
 
 const mentorPrompts: Record<string, string> = {
   GHOST: ghostPrompt,
@@ -140,14 +139,14 @@ export class MentorService {
       challenge = challenge.trim();
 
       // Store the complete message in the database
-      await prisma.mentorMessage.create({
+      /*await prisma.mentorMessage.create({
         data: {
           userId: input.userId,
           message: fullMessage,
           role: "assistant",
           mentor_type: mentorTypeToPersona[input.persona],
         },
-      });
+      });*/
 
       // Only cache if this is a habit log response
       const cacheKey = this.getCacheKey(input);

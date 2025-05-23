@@ -9,7 +9,7 @@ import type { MentorType } from "@/components/private/chat/mentor-select";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { kv } from "@/packages/kv/redis";
 import { prisma } from "@/packages/database/prisma";
-import { MentorPersona, MessageRole } from "@prisma/client";
+//import { MentorPersona, MessageRole } from "@prisma/client";
 
 interface AIMessage {
   role: string;
@@ -26,12 +26,12 @@ const mentorPrompts: Record<MentorType, string> = {
 export const maxDuration = 10; // Allow streaming responses up to 30 seconds
 
 // Map frontend mentor types to schema enum
-const mentorTypeToPersona: Record<MentorType, MentorPersona> = {
+/*const mentorTypeToPersona: Record<MentorType, MentorPersona> = {
   GHOST: MentorPersona.GHOST,
   MONK: MentorPersona.MONK,
   WARRIOR: MentorPersona.WARRIOR,
   CEO: MentorPersona.SHADOW,
-};
+};*/
 
 export async function POST(req: Request) {
   try {
@@ -92,19 +92,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Store the user's message
-    const userMessage = messages[messages.length - 1];
-    if (userMessage && userMessage.role === "user") {
-      await prisma.mentorMessage.create({
-        data: {
-          userId: user.id,
-          message: userMessage.content,
-          role: MessageRole.user,
-          mentor_type: mentorTypeToPersona[mentor as MentorType],
-        },
-      });
-    }
-
     // Get AI response
     const result = streamText({
       model: openai("gpt-4o-mini"),
@@ -127,16 +114,6 @@ export async function POST(req: Request) {
             console.error("Invalid response format from AI");
             return;
           }
-
-          // Store the AI response
-          await prisma.mentorMessage.create({
-            data: {
-              userId: user.id,
-              message: response,
-              role: MessageRole.assistant,
-              mentor_type: mentorTypeToPersona[mentor as MentorType],
-            },
-          });
         } catch (error) {
           console.error("Failed to save chat message:", error);
         }
