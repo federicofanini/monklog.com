@@ -34,7 +34,7 @@ interface PricingPlan {
   popular?: boolean;
 }
 
-const plans: PricingPlan[] = [
+export const plans: PricingPlan[] = [
   {
     ...STRIPE_PLANS.LIFETIME,
     description: "Best value for long-term growth",

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { paths } from "@/lib/path";
+import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -37,16 +39,16 @@ export function HeroSection() {
         </svg>
       </a>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-24 text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 py-24 text-center space-y-12">
+        <div className="space-y-6">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white font-mono">
             STOP BEING WEAK.
           </h1>
           <p className="text-xl md:text-2xl text-red-500 font-mono">
             You know the excuses. The bullsh*t. The comfortable path to
             mediocrity.
           </p>
-          <p className="text-xl md:text-2xl text-white/80">
+          <p className="text-xl md:text-2xl text-white/80 font-mono">
             MonkLog is your sergeant, hardwired for one mission:{" "}
             <span className="text-red-500">YOUR TRANSFORMATION.</span>
           </p>
@@ -55,9 +57,15 @@ export function HeroSection() {
         <div className="flex flex-col items-center gap-6">
           <Link
             href={paths.api.login}
-            className="bg-red-500 hover:bg-red-600 text-white font-mono px-8 py-4 rounded-none transition-all duration-300 text-lg uppercase tracking-wider w-full max-w-sm"
+            className={cn(
+              "bg-red-500/80 hover:bg-red-500 text-white font-mono",
+              "px-8 py-4 rounded-none transition-all duration-300",
+              "text-lg uppercase tracking-wider w-full max-w-sm",
+              "flex items-center justify-center gap-2"
+            )}
           >
-            FORGE YOUR FUTURE, NOW.
+            FORGE YOUR FUTURE
+            <ArrowRight className="h-4 w-4" />
           </Link>
 
           <div className="space-y-2 font-mono text-sm">
@@ -65,8 +73,8 @@ export function HeroSection() {
               100% Open Source. No Excuses. No Bullshit.
             </p>
             <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-              <p className="text-yellow-500 uppercase tracking-wider">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <p className="text-red-500 uppercase tracking-wider">
                 Under Development
               </p>
             </div>
