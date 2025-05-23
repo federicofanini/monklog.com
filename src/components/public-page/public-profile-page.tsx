@@ -4,9 +4,7 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileStatsCard } from "@/components/private/profile/profile-stats-card";
-import { DailyLogs } from "@/components/private/profile/daily-logs";
 import { format } from "date-fns";
 import { Activity, Brain, Heart, Medal, Star, Trophy } from "lucide-react";
 import type { PublicProfile } from "@/packages/database/user/public-profile";
@@ -36,11 +34,6 @@ export function PublicProfilePage({
     }
   };
 
-  const handleDateChange = (date: Date) => {
-    // Handle date change for daily logs
-    console.log("Date changed:", date);
-  };
-
   if (!profile.stats) {
     return (
       <div className="bg-black py-18">
@@ -64,7 +57,7 @@ export function PublicProfilePage({
         <Card className="bg-black/40 border-red-500/20 mb-6">
           <CardContent className="pt-6">
             <div className="flex items-start space-x-4">
-              <Avatar className="h-20 w-20 rounded-lg border-2 border-red-500/20">
+              <Avatar className="h-20 w-20 rounded-2xl border-2 border-red-500/20">
                 <AvatarImage src={profile.avatar_url || ""} />
                 <AvatarFallback className="bg-red-500/10 text-red-500 text-xl">
                   {profile.full_name[0]}
@@ -107,7 +100,7 @@ export function PublicProfilePage({
 
         {/* Stats Overview */}
         <Card className="bg-black/40 border-red-500/20 mb-6">
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center space-x-3 p-4 bg-red-500/10 rounded-lg">
                 <Activity className="h-8 w-8 text-red-500" />
@@ -147,68 +140,45 @@ export function PublicProfilePage({
         </Card>
 
         {/* Detailed Stats */}
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="bg-red-500/20 border-0">
-            <TabsTrigger
-              value="overview"
-              className="font-mono text-xs data-[state=active]:bg-red-500/80"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="daily"
-              className="font-mono text-xs data-[state=active]:bg-red-500/80"
-            >
-              Daily Logs
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4 mt-4">
-            <div className="flex items-center justify-end space-x-2">
-              <Button
-                variant={timeframe === 7 ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTimeframeChange(7)}
-                className={`font-mono text-xs ${
-                  timeframe === 7
-                    ? "bg-red-500/80 hover:bg-red-500"
-                    : "bg-red-500/20 hover:bg-red-500/30 border-0"
-                }`}
-              >
-                7 Days
-              </Button>
-              <Button
-                variant={timeframe === 30 ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTimeframeChange(30)}
-                className={`font-mono text-xs ${
-                  timeframe === 30
-                    ? "bg-red-500/80 hover:bg-red-500"
-                    : "bg-red-500/20 hover:bg-red-500/30 border-0"
-                }`}
-              >
-                30 Days
-              </Button>
-              <Button
-                variant={timeframe === 90 ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTimeframeChange(90)}
-                className={`font-mono text-xs ${
-                  timeframe === 90
-                    ? "bg-red-500/80 hover:bg-red-500"
-                    : "bg-red-500/20 hover:bg-red-500/30 border-0"
-                }`}
-              >
-                90 Days
-              </Button>
-            </div>
-            <ProfileStatsCard stats={profile.stats} />
-          </TabsContent>
-
-          <TabsContent value="daily">
-            <DailyLogs onDateChange={handleDateChange} dailyData={[]} />
-          </TabsContent>
-        </Tabs>
+        <div className="flex items-center justify-end space-x-2 mb-4">
+          <Button
+            variant={timeframe === 7 ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleTimeframeChange(7)}
+            className={`font-mono text-xs ${
+              timeframe === 7
+                ? "bg-red-500/80 hover:bg-red-500"
+                : "bg-red-500/20 hover:bg-red-500/30 border-0"
+            }`}
+          >
+            7 Days
+          </Button>
+          <Button
+            variant={timeframe === 30 ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleTimeframeChange(30)}
+            className={`font-mono text-xs ${
+              timeframe === 30
+                ? "bg-red-500/80 hover:bg-red-500"
+                : "bg-red-500/20 hover:bg-red-500/30 border-0"
+            }`}
+          >
+            30 Days
+          </Button>
+          <Button
+            variant={timeframe === 90 ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleTimeframeChange(90)}
+            className={`font-mono text-xs ${
+              timeframe === 90
+                ? "bg-red-500/80 hover:bg-red-500"
+                : "bg-red-500/20 hover:bg-red-500/30 border-0"
+            }`}
+          >
+            90 Days
+          </Button>
+        </div>
+        <ProfileStatsCard stats={profile.stats} />
       </div>
     </div>
   );
